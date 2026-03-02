@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  assertRecord,
+  parseOptionalInt,
+  parseRequiredString,
+  ValidationError,
+  validationError,
+} from "@/lib/api-validation";
 
 export async function GET() {
   try {
@@ -44,12 +51,19 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, weight = 5 } = body;
+    const payload = assertRecord(body);
+    const name = parseRequiredString(payload.name, "name", 1, 120);
+    const weight = parseOptionalInt(payload.weight, "weight", 1, 10) ?? 5;
+    const friction = parseOptionalInt(payload.friction, "friction", 1, 10) ?? 5;
+
     const project = await prisma.project.create({
-      data: { name, weight },
+      data: { name, weight, friction },
     });
     return NextResponse.json(project, { status: 201 });
   } catch (error: any) {
+    if (error instanceof ValidationError) {
+      return validationError(error.message);
+    }
     console.error("Error creating project:", error);
     return NextResponse.json(
       {

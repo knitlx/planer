@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { TaskBoard } from "@/components/TaskBoard";
 import type { ProjectWithMeta, Task } from "@/types/project";
 import { TASK_STATUS } from "@/lib/project-utils";
+import { AppModal } from "@/components/AppModal";
 
 export default function FocusProjectPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = params.projectId as string;
 
@@ -27,6 +29,12 @@ export default function FocusProjectPage() {
     if (!projectId) return;
     fetchProjectData();
   }, [projectId]);
+
+  useEffect(() => {
+    if (searchParams.get("newTask") === "1") {
+      setShowAddTask(true);
+    }
+  }, [searchParams]);
 
   const fetchProjectData = async () => {
     try {
@@ -185,55 +193,53 @@ export default function FocusProjectPage() {
         </div>
       </div>
 
-      {showSettings && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-qf-border-glass bg-qf-bg-glass backdrop-blur-xl p-6 md:p-8">
-            <h3 className="text-2xl font-bold mb-6">Настройки проекта</h3>
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-qf-text-muted">Название</label>
-                <Input
-                  value={project.name}
-                  onChange={(event) =>
-                    setProject({ ...project, name: event.target.value })
-                  }
-                  className="bg-qf-bg-secondary border-qf-border-primary"
-                />
-              </div>
+      <AppModal
+        open={showSettings}
+        title="Настройки проекта"
+        onClose={() => setShowSettings(false)}
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setShowSettings(false)}
+              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+            >
+              Отмена
+            </button>
+            <button
+              onClick={handleSaveSettings}
+              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity"
+            >
+              Сохранить
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Название</label>
+            <Input
+              value={project.name}
+              onChange={(event) => setProject({ ...project, name: event.target.value })}
+              className="bg-qf-bg-secondary border-qf-border-primary"
+            />
+          </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs uppercase tracking-wider text-qf-text-muted">Важность</label>
-                  <span className="text-sm text-qf-text-secondary">{importance}%</span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={importance}
-                  onChange={(event) => setImportance(Number(event.target.value))}
-                  className="w-full accent-purple-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
-                >
-                  Отмена
-                </button>
-                <button
-                  onClick={handleSaveSettings}
-                  className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity"
-                >
-                  Сохранить
-                </button>
-              </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs uppercase tracking-wider text-qf-text-muted">Важность</label>
+              <span className="text-sm text-qf-text-secondary">{importance}%</span>
             </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={importance}
+              onChange={(event) => setImportance(Number(event.target.value))}
+              className="w-full accent-purple-500"
+            />
           </div>
         </div>
-      )}
+      </AppModal>
     </section>
   );
 }

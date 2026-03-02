@@ -10,3 +10,8 @@ prisma/migrations
 
 .DS_Store
 *.tsbuildinfo
+design-preview.html
+old-design.html
+design-prototypes/
+screenshot*.png
+docs/
