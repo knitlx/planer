@@ -1,0 +1,381 @@
+@import "tailwindcss";
+@source "../components";
+@source "../app";
+
+@plugin "tailwindcss-animate";
+
+@theme {
+  /* 
+   * Quantum Flow Theme Variables
+   * Все переменные определены в src/lib/quantum-theme.ts
+   * Это гарантирует единый источник истины
+   */
+  
+  /* Цвета */
+  --color-qf-purple: var(--qf-color-purple);
+  --color-qf-blue: var(--qf-color-blue);
+  --color-qf-bg-primary: var(--qf-color-bg-primary);
+  --color-qf-bg-secondary: var(--qf-color-bg-secondary);
+  --color-qf-bg-tertiary: var(--qf-color-bg-tertiary);
+  --color-qf-bg-glass: var(--qf-color-bg-glass);
+  --color-qf-text-primary: var(--qf-color-text-primary);
+  --color-qf-text-secondary: var(--qf-color-text-secondary);
+  --color-qf-text-muted: var(--qf-color-text-muted);
+  --color-qf-text-accent: var(--qf-color-text-accent);
+  --color-qf-border-primary: var(--qf-color-border-primary);
+  --color-qf-border-secondary: var(--qf-color-border-secondary);
+  --color-qf-border-accent: var(--qf-color-border-accent);
+  --color-qf-border-glass: var(--qf-color-border-glass);
+  
+  /* Статусы */
+  --color-qf-status-high-bg: var(--qf-color-status-high-bg);
+  --color-qf-status-high-text: var(--qf-color-status-high-text);
+  --color-qf-status-medium-bg: var(--qf-color-status-medium-bg);
+  --color-qf-status-medium-text: var(--qf-color-status-medium-text);
+  --color-qf-status-low-bg: var(--qf-color-status-low-bg);
+  --color-qf-status-low-text: var(--qf-color-status-low-text);
+  --color-qf-status-completed-bg: var(--qf-color-status-completed-bg);
+  --color-qf-status-completed-text: var(--qf-color-status-completed-text);
+  
+  /* Градиенты */
+  --gradient-qf-primary: var(--qf-gradient-primary);
+  --gradient-qf-subtle: var(--qf-gradient-subtle);
+  --gradient-qf-hover: var(--qf-gradient-hover);
+  --gradient-qf-background: var(--qf-gradient-background);
+  --gradient-qf-card: var(--qf-gradient-card);
+  --gradient-qf-text: var(--qf-gradient-text);
+  
+  /* Тени */
+  --shadow-qf-glow: var(--qf-shadow-glow);
+  --shadow-qf-inner: var(--qf-shadow-inner);
+  
+  /* Анимации */
+  --animate-quantum-pulse: quantum-pulse 2s ease-in-out infinite;
+  --animate-quantum-glow: quantum-glow 3s ease-in-out infinite alternate;
+  --animate-quantum-float: quantum-float 6s ease-in-out infinite;
+  
+  @keyframes quantum-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  @keyframes quantum-glow {
+    0% { 
+      box-shadow: 0 0 5px rgba(139, 92, 246, 0.3),
+                  0 0 10px rgba(139, 92, 246, 0.2),
+                  0 0 15px rgba(139, 92, 246, 0.1);
+    }
+    100% { 
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.5),
+                  0 0 20px rgba(139, 92, 246, 0.3),
+                  0 0 30px rgba(139, 92, 246, 0.2);
+    }
+  }
+  
+  @keyframes quantum-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+@layer base {
+  :root {
+    /* 
+     * CSS Variables for Quantum Flow
+     * Автоматически генерируются из quantum-theme.ts
+     * Используйте generateQuantumCSSVars() для обновления
+     */
+    --qf-color-purple: #8B5CF6;
+    --qf-color-blue: #06B6D4;
+    --qf-color-bg-primary: #0A0A0F;
+    --qf-color-bg-secondary: #121218;
+    --qf-color-bg-tertiary: #1A1A22;
+    --qf-color-bg-glass: rgba(18, 18, 24, 0.8);
+    --qf-color-text-primary: #FFFFFF;
+    --qf-color-text-secondary: #A0A0B0;
+    --qf-color-text-muted: #6B6B7A;
+    --qf-color-text-accent: #8B5CF6;
+    --qf-color-border-primary: rgba(255, 255, 255, 0.1);
+    --qf-color-border-secondary: rgba(255, 255, 255, 0.05);
+    --qf-color-border-accent: rgba(139, 92, 246, 0.3);
+    --qf-color-border-glass: rgba(255, 255, 255, 0.15);
+    --qf-color-status-high-bg: rgba(239, 68, 68, 0.15);
+    --qf-color-status-high-text: #EF4444;
+    --qf-color-status-medium-bg: rgba(245, 158, 11, 0.15);
+    --qf-color-status-medium-text: #F59E0B;
+    --qf-color-status-low-bg: rgba(34, 197, 94, 0.15);
+    --qf-color-status-low-text: #22C55E;
+    --qf-color-status-completed-bg: rgba(139, 92, 246, 0.15);
+    --qf-color-status-completed-text: #8B5CF6;
+    --qf-gradient-primary: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+    --qf-gradient-subtle: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
+    --qf-gradient-hover: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+    --qf-gradient-background: linear-gradient(135deg, #0A0A0F 0%, #121218 100%);
+    --qf-gradient-card: linear-gradient(135deg, #121218 0%, #1A1A22 100%);
+    --qf-gradient-text: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+    --qf-shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
+    --qf-shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    
+    /* Legacy compatibility */
+    --background: var(--qf-color-bg-primary);
+    --foreground: var(--qf-color-text-primary);
+  }
+  
+  body {
+    background: var(--qf-color-bg-primary);
+    color: var(--qf-color-text-primary);
+    font-family: 'Inter', sans-serif;
+    background-image: var(--qf-gradient-background);
+    min-height: 100vh;
+  }
+  
+  /* Selection */
+  ::selection {
+    background-color: rgba(139, 92, 246, 0.3);
+    color: var(--qf-color-text-primary);
+  }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--qf-color-bg-secondary);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--qf-color-border-primary);
+    border-radius: 5px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--qf-color-border-accent);
+  }
+}
+
+@layer components {
+  /* 
+   * Quantum Flow Components
+   * Используйте готовые классы для быстрой разработки
+   */
+  
+  /* Glass Effects - Use Tailwind classes instead */
+  /* .glass {
+    background: var(--qf-color-bg-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--qf-color-border-glass);
+  }
+  
+  .glass-light {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-dark {
+    backdrop-filter: blur(16px);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  } */
+  
+  /* Cards */
+  .card {
+    background: var(--qf-color-bg-secondary);
+    border: 1px solid var(--qf-color-border-primary);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    background-image: var(--qf-gradient-card);
+  }
+  
+  .card:hover {
+    border-color: var(--qf-color-border-accent);
+    box-shadow: var(--qf-shadow-glow);
+    transform: translateY(-2px);
+  }
+  
+  /* .card-glass {
+    @apply glass;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .card-glass:hover {
+    border-color: var(--qf-color-border-glass);
+    box-shadow: var(--qf-shadow-glow);
+  } */
+  
+  /* Buttons */
+  .btn-primary {
+    background: var(--qf-gradient-primary);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--qf-shadow-glow);
+  }
+  
+  .btn-secondary {
+    background: var(--qf-color-bg-tertiary);
+    color: var(--qf-color-text-primary);
+    border: 1px solid var(--qf-color-border-primary);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-secondary:hover {
+    border-color: var(--qf-color-border-accent);
+    background: var(--qf-gradient-subtle);
+  }
+  
+  .btn-ghost {
+    background: transparent;
+    color: var(--qf-color-text-secondary);
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-ghost:hover {
+    background: var(--qf-gradient-hover);
+    color: var(--qf-color-text-primary);
+  }
+  
+  /* Navigation */
+  .nav-item {
+    color: var(--qf-color-text-secondary);
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-item:hover {
+    background: var(--qf-gradient-hover);
+    color: var(--qf-color-text-primary);
+  }
+  
+  .nav-item-active {
+    background: var(--qf-gradient-subtle);
+    color: var(--qf-color-text-accent);
+    border-radius: 0.75rem;
+  }
+  
+  /* Badges */
+  .badge-high {
+    background-color: var(--qf-color-status-high-bg);
+    color: var(--qf-color-status-high-text);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .badge-medium {
+    background-color: var(--qf-color-status-medium-bg);
+    color: var(--qf-color-status-medium-text);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .badge-low {
+    background-color: var(--qf-color-status-low-bg);
+    color: var(--qf-color-status-low-text);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .badge-completed {
+    background-color: var(--qf-color-status-completed-bg);
+    color: var(--qf-color-status-completed-text);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  /* Gradient Text */
+  .gradient-text {
+    background: var(--qf-gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  /* Animations */
+  .animate-quantum-pulse {
+    animation: quantum-pulse 2s ease-in-out infinite;
+  }
+  
+  .animate-quantum-glow {
+    animation: quantum-glow 3s ease-in-out infinite alternate;
+  }
+  
+  .animate-quantum-float {
+    animation: quantum-float 6s ease-in-out infinite;
+  }
+  
+  /* Inputs */
+  .input {
+    background: var(--qf-color-bg-tertiary);
+    border: 1px solid var(--qf-color-border-primary);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: var(--qf-color-text-primary);
+    transition: all 0.3s ease;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: var(--qf-color-border-accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  }
+  
+  /* Dividers */
+  .divider {
+    height: 1px;
+    background: var(--qf-color-border-primary);
+    margin: 1.5rem 0;
+  }
+  
+  /* Task Containers */
+  .task-container {
+    background: var(--qf-color-bg-tertiary);
+    border: 1px solid var(--qf-color-border-secondary);
+    border-radius: 1rem;
+    min-height: 240px;
+    transition: all 0.3s ease;
+  }
+  
+  .task-container:hover {
+    border-color: var(--qf-color-border-primary);
+  }
+  
+  /* Status Bars */
+  .status-bar {
+    background: var(--qf-gradient-primary);
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  /* Logo */
+  .logo-box {
+    background: var(--qf-gradient-primary);
+    box-shadow: var(--qf-shadow-glow);
+    border-radius: 1rem;
+    padding: 1rem;
+  }
+}
