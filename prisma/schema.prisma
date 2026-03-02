@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // URL is configured in prisma.config.ts
+}
+
+model Project {
+  id              String        @id @default(cuid())
+  userId          String?
+  user            User?         @relation(fields: [userId], references: [id])
+  name            String
+  weight          Int           @default(5)
+  friction        Int           @default(5)
+  progress        Float         @default(0)
+  status          ProjectStatus @default(INCUBATOR)
+  lastActive      DateTime      @default(now())
+  lastSessionNote String?
+  tasks           Task[]
+  ideas           Idea[]
+  notificationLogs NotificationLog[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model Task {
+  id              String    @id @default(cuid())
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title           String
+  type            TaskType  @default(ACTION)
+  status          TaskStatus @default(TODO)
+  isNextStep      Boolean   @default(false)
+  order           Int       @default(0)
+  timerLog        String?
+  contextSummary  String?
+  isSimplified    Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@index([projectId, status])
+}
+
+model Idea {
+  id        String   @id @default(cuid())
+  content   String
+  source    String   @default("Web")
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([processed])
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  type      String
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  sentAt    DateTime @default(now())
+
+  @@unique([type, projectId])
+  @@index([type, projectId])
+}
+
+model User {
+  id         String    @id @default(cuid())
+  telegramId Int       @unique
+  name       String?
+  projects   Project[]
+  createdAt  DateTime  @default(now())
+}
+
+enum ProjectStatus {
+  INCUBATOR
+  ACTIVE
+  SNOOZED
+  FINAL_STRETCH
+}
+
+enum TaskType {
+  ACTION
+  SESSION
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
