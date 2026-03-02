@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
 import { TaskService } from "@/services/TaskService";
+import {
+  assertRecord,
+  parseOptionalString,
+  ValidationError,
+  validationError,
+} from "@/lib/api-validation";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;
-  const body = await request.json();
-  const { contextSummary, timerLog } = body;
-
   try {
+    const { id } = await params;
+    const body = await request.json();
+    const payload = assertRecord(body);
+    const contextSummary = parseOptionalString(payload.contextSummary, "contextSummary", 4000);
+    const timerLog = parseOptionalString(payload.timerLog, "timerLog", 4000);
+
     const result = await TaskService.completeTaskWithProgress(
       id,
       contextSummary,
@@ -17,6 +25,9 @@ export async function PUT(
     );
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof ValidationError) {
+      return validationError(error.message);
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 },

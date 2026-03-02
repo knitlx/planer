@@ -1,19 +1,74 @@
 import { NextResponse } from "next/server";
+import { IdeaStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  assertRecord,
+  parseEnumValue,
+  parseOptionalString,
+  parseRequiredString,
+  ValidationError,
+  validationError,
+} from "@/lib/api-validation";
 
-export async function GET() {
+const IDEA_STATUSES = [
+  "INBOX",
+  "CONVERTED_TO_TASK",
+  "CONVERTED_TO_PROJECT",
+  "ARCHIVED",
+] as const;
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const statusParam = searchParams.get("status");
+
+  let status: IdeaStatus | undefined;
+  if (statusParam && statusParam !== "ALL") {
+    try {
+      status = parseEnumValue(statusParam, "status", IDEA_STATUSES);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return validationError(error.message);
+      }
+    }
+  }
+
   const ideas = await prisma.idea.findMany({
-    where: { processed: false },
+    where: status ? { status } : undefined,
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(ideas);
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { content, source = "Web", projectId } = body;
-  const idea = await prisma.idea.create({
-    data: { content, source, projectId },
-  });
-  return NextResponse.json(idea, { status: 201 });
+  try {
+    const body = await request.json();
+    const payload = assertRecord(body);
+    const content = parseRequiredString(payload.content, "content", 1, 2000);
+    const source = parseOptionalString(payload.source, "source", 120) ?? "Web";
+    const projectId = parseOptionalString(payload.projectId, "projectId", 100);
+
+    if (projectId) {
+      const project = await prisma.project.findUnique({
+        where: { id: projectId },
+        select: { id: true },
+      });
+
+      if (!project) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      }
+    }
+
+    const idea = await prisma.idea.create({
+      data: { content, source, projectId, status: "INBOX", processed: false },
+    });
+    return NextResponse.json(idea, { status: 201 });
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return validationError(error.message);
+    }
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 },
+    );
+  }
 }

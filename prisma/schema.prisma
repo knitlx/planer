@@ -48,15 +48,19 @@ model Task {
 }
 
 model Idea {
-  id        String   @id @default(cuid())
-  content   String
-  source    String   @default("Web")
-  projectId String?
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  processed Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id                 String              @id @default(cuid())
+  content            String
+  source             String              @default("Web")
+  projectId          String?
+  project            Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  processed          Boolean             @default(false)
+  status             IdeaStatus          @default(INBOX)
+  convertedEntityType ConvertedEntityType?
+  convertedEntityId  String?
+  createdAt          DateTime            @default(now())
 
   @@index([processed])
+  @@index([status])
 }
 
 model NotificationLog {
@@ -95,4 +99,16 @@ enum TaskStatus {
   IN_PROGRESS
   DONE
   CANCELLED
+}
+
+enum IdeaStatus {
+  INBOX
+  CONVERTED_TO_TASK
+  CONVERTED_TO_PROJECT
+  ARCHIVED
+}
+
+enum ConvertedEntityType {
+  TASK
+  PROJECT
 }

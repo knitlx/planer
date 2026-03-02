@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -13,6 +13,12 @@ export function QuickCollect() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useHotkeys("ctrl+i, meta+i", () => setInputVisible(true));
+
+  useEffect(() => {
+    const handler = () => setInputVisible(true);
+    window.addEventListener("quick-collect:open", handler);
+    return () => window.removeEventListener("quick-collect:open", handler);
+  }, []);
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
