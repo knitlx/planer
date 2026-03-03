@@ -26,6 +26,25 @@
   --color-qf-border-secondary: var(--qf-color-border-secondary);
   --color-qf-border-accent: var(--qf-color-border-accent);
   --color-qf-border-glass: var(--qf-color-border-glass);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   
   /* Статусы */
   --color-qf-status-high-bg: var(--qf-color-status-high-bg);
@@ -119,6 +138,23 @@
     /* Legacy compatibility */
     --background: var(--qf-color-bg-primary);
     --foreground: var(--qf-color-text-primary);
+    --card: var(--qf-color-bg-secondary);
+    --card-foreground: var(--qf-color-text-primary);
+    --popover: var(--qf-color-bg-secondary);
+    --popover-foreground: var(--qf-color-text-primary);
+    --primary: var(--qf-color-purple);
+    --primary-foreground: #ffffff;
+    --secondary: var(--qf-color-bg-tertiary);
+    --secondary-foreground: var(--qf-color-text-primary);
+    --muted: var(--qf-color-bg-tertiary);
+    --muted-foreground: var(--qf-color-text-muted);
+    --accent: var(--qf-color-blue);
+    --accent-foreground: #ffffff;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: var(--qf-color-border-primary);
+    --input: var(--qf-color-border-primary);
+    --ring: var(--qf-color-blue);
   }
   
   body {
@@ -377,5 +413,15 @@
     box-shadow: var(--qf-shadow-glow);
     border-radius: 1rem;
     padding: 1rem;
+  }
+}
+
+@layer utilities {
+  .qf-gradient-text {
+    background-image: var(--qf-gradient-text);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 }

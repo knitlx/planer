@@ -26,7 +26,7 @@ export default function RootLayout({
       <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <QuantumSidebar />
-          <main className="md:pl-64 min-h-screen">{children}</main>
+          <main className="md:pl-64 min-h-screen text-white">{children}</main>
           <Toaster />
         </ThemeProvider>
       </body>
