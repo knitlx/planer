@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center text-center py-24 px-6 card">
-      <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-6">
+      <div className="w-16 h-16 rounded-2xl bg-qf-gradient-subtle border border-qf-border-primary flex items-center justify-center mb-6">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="32"
@@ -30,7 +30,7 @@ export function EmptyState() {
         Проекты - это место, где живёт ваша работа. Создайте свой первый проект,
         чтобы начать отслеживать задачи и развивать концентрацию.
       </p>
-      <Button className="bg-accent hover:bg-accent-hover text-black font-medium">
+      <Button className="bg-qf-gradient-primary text-white font-medium hover:opacity-90">
         + Создать проект
       </Button>
     </div>

@@ -3,12 +3,14 @@ import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
   parseOptionalEnumValue,
+  parseOptionalNonNegativeInt,
   parseOptionalString,
   ValidationError,
   validationError,
 } from "@/lib/api-validation";
 
 const TASK_TYPES = ["ACTION", "SESSION"] as const;
+const TASK_STATUSES = ["TODO", "IN_PROGRESS", "DONE", "CANCELLED"] as const;
 
 export async function PUT(
   request: Request,
@@ -20,8 +22,10 @@ export async function PUT(
     const payload = assertRecord(body);
     const title = parseOptionalString(payload.title, "title", 500);
     const type = parseOptionalEnumValue(payload.type, "type", TASK_TYPES);
+    const status = parseOptionalEnumValue(payload.status, "status", TASK_STATUSES);
+    const order = parseOptionalNonNegativeInt(payload.order, "order");
 
-    if (title === undefined && type === undefined) {
+    if (title === undefined && type === undefined && status === undefined && order === undefined) {
       return validationError("At least one field is required");
     }
 
@@ -30,6 +34,8 @@ export async function PUT(
       data: {
         title,
         type,
+        status,
+        order,
       },
     });
 

@@ -23,14 +23,7 @@ export function Celebration({
 
   useEffect(() => {
     if (isVisible) {
-      const colors = [
-        "#6366f1",
-        "#8b5cf6",
-        "#a78bfa",
-        "#f472b6",
-        "#34d399",
-        "#fbbf24",
-      ];
+      const colors = ["#8A2BE2", "#00E5FF", "#6EEFFF", "#A855F7", "#22D3EE", "#C084FC"];
       const newParticles = Array.from({ length: 50 }, (_, i) => ({
         id: i,
         x: Math.random() * 100,
@@ -84,7 +77,7 @@ export function Celebration({
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0, rotate: 180 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="relative bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl text-center max-w-sm mx-4"
+            className="relative quantum-glass rounded-3xl p-8 shadow-2xl text-center max-w-sm mx-4 border border-qf-border-primary"
           >
             <motion.div
               animate={{
@@ -92,7 +85,7 @@ export function Celebration({
                 rotate: [0, 10, -10, 0],
               }}
               transition={{ duration: 0.5, repeat: 2 }}
-              className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg"
+              className="w-20 h-20 mx-auto mb-4 bg-qf-gradient-primary rounded-full flex items-center justify-center shadow-lg"
             >
               <Trophy className="w-10 h-10 text-white" />
             </motion.div>
@@ -101,7 +94,7 @@ export function Celebration({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2"
+              className="text-2xl font-bold gradient-text mb-2"
             >
               {title}
             </motion.h2>
@@ -110,7 +103,7 @@ export function Celebration({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-slate-600 dark:text-slate-300 mb-4"
+              className="text-qf-text-secondary mb-4"
             >
               {message}
             </motion.p>
@@ -119,7 +112,7 @@ export function Celebration({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="flex items-center justify-center gap-2 text-sm text-slate-400"
+              className="flex items-center justify-center gap-2 text-sm text-qf-text-muted"
             >
               <Sparkles className="w-4 h-4" />
               <span>Отличная работа!</span>

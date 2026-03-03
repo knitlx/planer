@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -15,6 +15,7 @@ import {
   Sparkles,
   ChevronRight,
   Loader2,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -23,15 +24,36 @@ import {
   quantumNavigationClasses,
   getStatusByProgress,
 } from "@/lib/quantum-theme";
+import { AppModal } from "@/components/AppModal";
 
 export function QuantumSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { projects, fetchProjects, isLoading, error } = useProjectStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
+
+  const handleNewProject = () => {
+    setMobileMenuOpen(false);
+    router.push("/focus/new");
+  };
+
+  const handleQuickCollect = () => {
+    setMobileMenuOpen(false);
+    window.dispatchEvent(new Event("quick-collect:open"));
+    const quickCollect = document.getElementById("quick-collect");
+    if (quickCollect) {
+      quickCollect.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleQuickFocus = () => {
+    setMobileMenuOpen(false);
+    router.push("/focus");
+  };
 
   const navItems = [
     { href: "/", label: "Главная", icon: Home },
@@ -45,63 +67,74 @@ export function QuantumSidebar() {
     return pathname.startsWith(path);
   };
 
-  return (
-    <aside className="hidden lg:flex h-full w-64 flex-col p-6 shrink-0 z-10 fixed left-0 top-0 bottom-0 backdrop-blur-lg bg-qf-bg-glass border-r border-qf-border-glass">
-      {/* Логотип с градиентом */}
-      <div
-        className="flex items-center gap-3 mb-10 cursor-pointer"
-        onClick={() => router.push("/")}
-      >
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-qf-gradient-primary">
-          <Sparkles className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h1
-            className={`font-bold text-lg leading-tight ${quantumGradientClasses.text}`}
-          >
-            Focus Flow
-          </h1>
-          <p className="text-xs text-qf-text-muted">Quantum Edition</p>
-        </div>
-      </div>
+  const getProjectDotColor = (progress: number) => {
+    if (progress >= 75) return "bg-cyan-400";
+    if (progress >= 45) return "bg-purple-400";
+    if (progress >= 15) return "bg-green-400";
+    return "bg-qf-text-muted";
+  };
 
-      {/* Основная навигация */}
-      <nav className="flex-1">
-        <div className="mb-8">
-          <h2 className={quantumNavigationClasses.section.title}>Навигация</h2>
-          <ul className="space-y-1">
+  return (
+    <>
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-20 px-4 py-3 border-b border-quantum bg-qf-bg-glass backdrop-blur-xl">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2"
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-qf-gradient-primary">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <span className={`font-semibold text-base ${quantumGradientClasses.text}`}>
+              Focus Flow
+            </span>
+          </button>
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="w-9 h-9 rounded-lg border border-qf-border-primary bg-qf-bg-secondary text-qf-text-secondary hover:text-white transition-colors flex items-center justify-center"
+            aria-label="Открыть меню"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+
+      <AppModal
+        open={mobileMenuOpen}
+        title="Меню"
+        onClose={() => setMobileMenuOpen(false)}
+        footer={null}
+      >
+        <div className="space-y-4">
+          <div className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`${quantumNavigationClasses.link.base} ${
-                      active
-                        ? quantumNavigationClasses.link.active
-                        : quantumNavigationClasses.link.inactive
-                    }`}
-                  >
-                    <Icon width={18} height={18} strokeWidth={2} />
-                    {item.label}
-                    {active && <ChevronRight className="w-3 h-3 ml-auto" />}
-                  </Link>
-                </li>
+                <button
+                  key={item.href}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push(item.href);
+                  }}
+                  className={`w-full ${quantumNavigationClasses.link.base} ${
+                    active
+                      ? quantumNavigationClasses.link.active
+                      : quantumNavigationClasses.link.inactive
+                  }`}
+                >
+                  <Icon width={18} height={18} strokeWidth={2} />
+                  {item.label}
+                  {active && <ChevronRight className="w-3 h-3 ml-auto" />}
+                </button>
               );
             })}
-          </ul>
-        </div>
-
-        {/* Быстрые действия */}
-        <div className="mb-8">
-          <h2 className={quantumNavigationClasses.section.title}>
-            Быстрые действия
-          </h2>
-          <div className="space-y-2">
+          </div>
+          <div className="grid grid-cols-1 gap-2 pt-2 border-t border-qf-border-secondary">
             <Button
               className={`w-full ${quantumNavigationClasses.button.primary}`}
               size="sm"
+              onClick={handleNewProject}
             >
               <Plus className="w-4 h-4 mr-2" />
               Новый проект
@@ -110,76 +143,109 @@ export function QuantumSidebar() {
               className={`w-full ${quantumNavigationClasses.button.secondary}`}
               variant="outline"
               size="sm"
+              onClick={handleQuickCollect}
             >
               <Zap className="w-4 h-4 mr-2" />
               Быстрый сбор
             </Button>
           </div>
         </div>
+      </AppModal>
 
-        {/* Проекты */}
-        <div>
-          <h2 className={quantumNavigationClasses.section.title}>Проекты</h2>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-4 h-4 animate-spin text-qf-text-muted" />
-            </div>
-          ) : error ? (
-            <div className="px-3 py-2 text-sm text-red-500">
-              Ошибка загрузки
-            </div>
-          ) : (
-            <ul className="space-y-1">
-              {projects.slice(0, 5).map((project) => (
-                <li key={project.id}>
-                  <Link
-                    href={`/focus/${project.id}`}
-                    className={`${quantumNavigationClasses.project.base} text-qf-text-secondary hover:text-white`}
-                  >
-                    <span className="flex items-center gap-3">
-                      <span
-                        className={`${quantumNavigationClasses.project.dot} ${
-                          quantumNavigationClasses.status[getStatusByProgress(project.progress)]
-                        }`}
-                      ></span>
-                      <span className="truncate">{project.name}</span>
-                    </span>
-                    <span className={quantumNavigationClasses.project.progress}>
-                      {project.progress}%
-                    </span>
-                  </Link>
-                </li>
-              ))}
-              {projects.length === 0 && (
-                <li className="px-3 py-2 text-sm text-qf-text-muted">
-                  Нет проектов
-                </li>
-              )}
-            </ul>
-          )}
-        </div>
-      </nav>
-
-      {/* Статус пользователя */}
-      <div className="mt-auto pt-6 border-t border-qf-border-primary space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-qf-gradient-primary flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
+      <aside className="hidden lg:flex w-64 h-screen flex-col fixed left-0 top-0 z-10 quantum-glass border-r border-quantum">
+        <div className="p-6 border-b border-[rgba(138,43,226,0.35)]">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push("/")}>
+            <div className="w-10 h-10 rounded-xl bg-qf-gradient-primary flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-xs font-medium text-white">Пользователь</p>
-              <span className="text-[10px] text-qf-text-muted flex items-center gap-1">
-                <Moon className="w-3 h-3" />
-                Тёмная тема
-              </span>
+              <h1 className="text-xl font-bold gradient-text">FOCUS FLOW</h1>
+              <p className="text-xs text-qf-text-muted">QUANTUM EDITION</p>
             </div>
           </div>
-          <div className="text-[9px] bg-qf-bg-secondary text-qf-text-muted px-1.5 py-0.5 rounded border border-qf-border-primary font-mono">
-            ⌘K
+        </div>
+
+        <nav className="flex-1 p-4">
+          <div className="mb-8">
+              <h3 className="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.42)] font-bold mb-3 px-2">НАВИГАЦИЯ</h3>
+              <div className="space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`sidebar-item text-base ${active ? "quantum-active text-white font-medium bg-[rgba(138,43,226,0.2)]" : "text-[rgba(255,255,255,0.82)] hover:bg-[rgba(138,43,226,0.1)] hover:text-white"}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{item.label}</span>
+                      {active && <ChevronRight className="w-3 h-3 ml-auto" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3 px-2">
+              <h3 className="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.42)] font-bold">ПРОЕКТЫ</h3>
+              <button onClick={handleNewProject} className="text-xs text-cyan-400 hover:text-cyan-300">+ Новый</button>
+            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-4 h-4 animate-spin text-qf-text-muted" />
+              </div>
+            ) : error ? (
+              <div className="px-3 py-2 text-sm text-red-500">Ошибка загрузки</div>
+            ) : (
+              <div className="space-y-1">
+                {projects.slice(0, 5).map((project) => (
+                  <Link key={project.id} href={`/focus/${project.id}`} className="sidebar-item text-[rgba(255,255,255,0.84)] hover:bg-[rgba(138,43,226,0.1)] hover:text-white">
+                    <span
+                      className={`w-2 h-2 rounded-full ${getProjectDotColor(project.progress)}`}
+                    />
+                    <span className="truncate flex-1">{project.name}</span>
+                    <span className="text-xs text-[rgba(255,255,255,0.5)]">{project.progress}%</span>
+                  </Link>
+                ))}
+                {projects.length === 0 && <div className="px-3 py-2 text-sm text-qf-text-muted">Нет проектов</div>}
+              </div>
+            )}
+          </div>
+
+          <div className="p-2 mt-auto">
+            <button
+              onClick={handleQuickCollect}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-black font-bold text-sm hover:opacity-90 transition-all mb-3"
+            >
+              Быстрый сбор
+            </button>
+            <button
+              onClick={handleQuickFocus}
+              className="w-full py-2 rounded-lg border border-[rgba(138,43,226,0.35)] text-sm hover:bg-[rgba(138,43,226,0.1)] transition-colors text-[rgba(255,255,255,0.86)] hover:text-white"
+            >
+              Старт фокус-сессии
+            </button>
+          </div>
+        </nav>
+
+        <div className="p-4 border-t border-[rgba(138,43,226,0.35)]">
+          <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-[rgba(138,43,226,0.1)] transition-colors">
+            <div className="w-8 h-8 rounded-full bg-qf-gradient-primary flex items-center justify-center text-xs font-bold">
+              <User className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="font-medium text-sm text-white">Пользователь</div>
+              <div className="text-xs text-qf-text-muted flex items-center gap-1">
+                <Moon className="w-3 h-3" />
+                Активный режим
+              </div>
+            </div>
+            <div className="text-xs bg-cyan-900/30 text-cyan-400 px-2 py-1 rounded">⌘K</div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

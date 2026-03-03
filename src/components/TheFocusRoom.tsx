@@ -58,8 +58,8 @@ export function TheFocusRoom() {
       exit={{ opacity: 0 }}
       className={`fixed inset-0 z-50 transition-colors duration-500 ${
         isStuckMode
-          ? "bg-gradient-to-br from-emerald-900 to-emerald-800"
-          : "bg-gradient-to-br from-slate-900 to-slate-800"
+          ? "bg-[radial-gradient(circle_at_20%_30%,rgba(138,43,226,0.14)_0%,transparent_40%),radial-gradient(circle_at_80%_70%,rgba(0,229,255,0.1)_0%,transparent_40%),#050509]"
+          : "bg-[radial-gradient(circle_at_20%_30%,rgba(138,43,226,0.08)_0%,transparent_40%),radial-gradient(circle_at_80%_70%,rgba(0,229,255,0.06)_0%,transparent_40%),#000000]"
       }`}
     >
       <div className="max-w-2xl mx-auto pt-16 px-6">
@@ -70,7 +70,7 @@ export function TheFocusRoom() {
         >
           <h1 className="text-4xl font-bold text-white mb-4">{project.name}</h1>
           {project.lastSessionNote && (
-            <div className="bg-white/10 backdrop-blur rounded-lg p-4 text-gray-200 italic border-l-4 border-blue-400">
+            <div className="bg-qf-bg-glass backdrop-blur-xl rounded-xl p-4 text-qf-text-secondary italic border-l-4 border-cyan-400 border border-qf-border-secondary">
               "Last time: {project.lastSessionNote}"
             </div>
           )}
@@ -84,7 +84,7 @@ export function TheFocusRoom() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white rounded-2xl p-8 shadow-2xl mb-6"
+              className="qf-shell-card rounded-2xl p-8 shadow-2xl mb-6 text-white"
             >
               <h2 className="text-2xl font-semibold mb-4">
                 {currentTask.title}
@@ -92,14 +92,14 @@ export function TheFocusRoom() {
 
               {currentTask.type === "SESSION" && (
                 <div className="mb-6">
-                  <div className="text-5xl font-mono font-bold text-blue-600 mb-2">
+                  <div className="text-5xl font-mono font-bold gradient-text mb-2">
                     {formatTime(timerElapsed)}
                   </div>
                 </div>
               )}
 
               {currentTask.contextSummary && (
-                <div className="bg-blue-50 rounded-lg p-3 text-sm text-gray-600 mb-4">
+                <div className="bg-qf-bg-secondary/80 rounded-lg p-3 text-sm text-qf-text-secondary mb-4 border border-qf-border-secondary">
                   <span className="font-semibold">Context:</span>{" "}
                   {currentTask.contextSummary}
                 </div>
@@ -114,13 +114,13 @@ export function TheFocusRoom() {
             onClick={() => setStuckMode(!isStuckMode)}
             className={
               isStuckMode
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "text-white border-white"
+                ? "bg-qf-gradient-primary text-white"
+                : "text-white border-qf-border-primary hover:border-qf-border-accent"
             }
           >
             {isStuckMode ? "✓ Feeling better" : "I'm stuck → Simplify"}
           </Button>
-          <Button onClick={handleStop} className="text-white">
+          <Button onClick={handleStop} className="text-white border border-qf-border-primary bg-qf-bg-secondary/80 hover:border-qf-border-accent">
             Stop & Save
           </Button>
         </div>

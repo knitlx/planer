@@ -190,7 +190,7 @@ export default function IdeasPage() {
     return (
       <div className="min-h-screen p-6">
         <div className="max-w-2xl mx-auto">
-          <div className="h-10 w-24 bg-white/5 rounded-xl animate-pulse mb-8" />
+          <div className="h-10 w-24 bg-qf-bg-secondary rounded-xl animate-pulse mb-8" />
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-24 card animate-pulse" />
@@ -213,7 +213,7 @@ export default function IdeasPage() {
 
         <div className="card p-4 mb-4">
           <h2 className="text-sm font-medium text-text-secondary flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-yellow-400" />
+            <Lightbulb className="w-4 h-4 text-cyan-300" />
             Идеи
           </h2>
           <div className="flex flex-wrap gap-2 my-4">
@@ -241,7 +241,7 @@ export default function IdeasPage() {
               {ideas.map((idea) => (
                 <div
                   key={idea.id}
-                  className="p-4 bg-white/5 rounded-lg border border-white/5 hover:border-accent/30 transition-colors"
+                  className="p-4 bg-qf-bg-secondary/70 rounded-lg border border-qf-border-secondary hover:border-qf-border-accent transition-colors"
                 >
                   <div className="flex justify-between items-start gap-3">
                     <p className="text-sm text-text-primary flex-1">
@@ -271,7 +271,7 @@ export default function IdeasPage() {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-accent hover:bg-accent-hover text-black text-xs h-7"
+                          className="bg-qf-gradient-primary text-white text-xs h-7 hover:opacity-90"
                           onClick={() => openProjectConversion(idea)}
                         >
                           Проект <ArrowRight className="w-3 h-3 ml-1" />
@@ -310,7 +310,7 @@ export default function IdeasPage() {
 
         <div className="p-4 card">
           <p className="text-xs text-text-muted">
-            <kbd className="px-2 py-1 bg-white/5 rounded text-xs">⌘K</kbd> чтобы
+            <kbd className="px-2 py-1 bg-qf-bg-secondary rounded text-xs border border-qf-border-secondary">⌘K</kbd> чтобы
             добавить мысль
           </p>
         </div>

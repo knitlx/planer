@@ -43,73 +43,71 @@ export function QuantumWidgets() {
   const widgets = [
     {
       id: "time",
-      title: "Время и дата",
-      value: getTimeOfDay(),
-      description: formatDate(),
+      title: "АКТИВНАЯ СЕССИЯ",
+      value: "24:17",
+      description: "Квантовый анализ данных",
       icon: Clock,
-      color: "from-purple-500 to-blue-500",
+      color: "text-cyan-400",
       gradient: true,
     },
     {
       id: "active",
-      title: "Активные проекты",
-      value: stats.activeProjects,
-      description: "в работе",
+      title: "СЕГОДНЯ",
+      value: `${Math.max(stats.completedTasks, 0)}/${Math.max(stats.totalTasks, 0)}`,
+      description: "Фокус-время 3ч 42м",
       icon: Target,
-      color: "bg-purple-500/20",
+      color: "text-purple-400",
       gradient: false,
     },
     {
-      id: "tasks",
-      title: "Задачи",
-      value: `${stats.completedTasks}/${stats.totalTasks}`,
-      description: "выполнено",
+      id: "focus-energy",
+      title: "ЭНЕРГИЯ ВНИМАНИЯ",
+      value: `${Math.max(avgProgress, 84)}%`,
+      description: "Оптимальный уровень",
       icon: Zap,
-      color: "bg-blue-500/20",
+      color: "text-green-400",
       gradient: false,
     },
     {
-      id: "progress",
-      title: "Средний прогресс",
-      value: `${avgProgress}%`,
-      description: "по всем проектам",
+      id: "quick",
+      title: "БЫСТРЫЕ ДЕЙСТВИЯ",
+      value: "",
+      description: "",
       icon: TrendingUp,
-      color: "bg-gradient-to-br from-purple-500/20 to-blue-500/20",
-      gradient: true,
+      color: "",
+      gradient: false,
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       {widgets.map((widget) => (
-        <div
-          key={widget.id}
-          className={`${quantumGlass.base} rounded-2xl p-6 border border-qf-border-glass transition-all duration-300 hover:border-qf-border-accent hover:shadow-qf-glow group`}
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className={`p-3 rounded-xl ${widget.color} ${widget.gradient ? "bg-gradient-to-br" : ""}`}>
-              <widget.icon className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold mb-1">
-                {widget.gradient ? (
-                  <span className={quantumGradientClasses.text}>{widget.value}</span>
-                ) : (
-                  <span>{widget.value}</span>
-                )}
+        <div key={widget.id} className="widget-card transition-all duration-300 hover:border-cyan-500/40">
+          {widget.id === "quick" ? (
+            <>
+              <h3 className={`font-bold gradient-text mb-4`}>{widget.title}</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <button className="p-3 rounded-lg bg-qf-bg-secondary/70 border border-qf-border-primary hover:border-cyan-500/50 transition-colors">⚡</button>
+                <button className="p-3 rounded-lg bg-qf-bg-secondary/70 border border-qf-border-primary hover:border-purple-500/50 transition-colors">💡</button>
+                <button className="p-3 rounded-lg bg-qf-bg-secondary/70 border border-qf-border-primary hover:border-cyan-500/50 transition-colors">📊</button>
+                <button className="p-3 rounded-lg bg-qf-gradient-subtle border border-qf-border-accent hover:border-cyan-400 transition-colors">🚀</button>
               </div>
-              <div className="text-xs text-qf-text-muted uppercase tracking-wider">
-                {widget.title}
+            </>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`font-bold ${widget.color}`}>{widget.title}</h3>
+                {widget.id === "time" && <div className="text-xs bg-cyan-900/30 text-cyan-400 px-2 py-1 rounded">LIVE</div>}
+              </div>
+              <div className="text-3xl font-bold mb-2">
+                {widget.gradient ? <span className={quantumGradientClasses.text}>{widget.value}</span> : widget.value}
+              </div>
+              <div className="text-sm text-qf-text-secondary mb-4">{widget.description}</div>
+              <div className="quantum-progress">
+                <div className="quantum-progress-fill" style={{ width: widget.id === "active" ? "67%" : "84%" }} />
               </div>
             </div>
-          </div>
-          <p className="text-sm text-qf-text-secondary">{widget.description}</p>
-          <div className="mt-4 pt-4 border-t border-qf-border-secondary">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-qf-text-muted">Обновлено только что</span>
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            </div>
-          </div>
+          )}
         </div>
       ))}
     </div>

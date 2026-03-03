@@ -118,7 +118,7 @@ export default function TasksPage() {
       return {
         label: "Готово",
         icon: CheckCircle2,
-        className: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+        className: "bg-cyan-500/20 text-cyan-200 border-cyan-500/30",
       };
     }
     if (status === TASK_STATUS.IN_PROGRESS) {
@@ -132,13 +132,13 @@ export default function TasksPage() {
       return {
         label: "Отменено",
         icon: Ban,
-        className: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+        className: "bg-qf-bg-secondary/80 text-qf-text-secondary border-qf-border-secondary",
       };
     }
     return {
       label: "К выполнению",
       icon: Circle,
-      className: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+      className: "bg-qf-gradient-subtle text-cyan-200 border-qf-border-primary",
     };
   };
 
