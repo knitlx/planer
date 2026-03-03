@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { TaskService } from "@/services/TaskService";
 import {
   assertRecord,
   parseOptionalEnumValue,
@@ -38,6 +39,14 @@ export async function PUT(
         order,
       },
     });
+
+    if (status !== undefined) {
+      const progress = await TaskService.calculateProjectProgress(task.projectId);
+      await prisma.project.update({
+        where: { id: task.projectId },
+        data: { progress, updatedAt: new Date() },
+      });
+    }
 
     return NextResponse.json(task);
   } catch (error: any) {
