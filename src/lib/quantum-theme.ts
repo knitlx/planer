@@ -196,7 +196,7 @@ export const quantumGlass = {
  * Готовые классы для градиентов
  */
 export const quantumGradientClasses = {
-  text: "bg-qf-gradient-text bg-clip-text text-transparent",
+  text: "qf-gradient-text",
   bg: "bg-qf-gradient-primary",
   border: "border border-transparent bg-qf-gradient-primary bg-clip-border",
 } as const;
