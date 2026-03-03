@@ -61,7 +61,7 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
               {getPriorityLabel(project.weight)}
             </span>
             {isComplete && (
-              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">
+              <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-medium border border-cyan-400/25">
                 Завершён
               </span>
             )}
@@ -79,7 +79,7 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
             className={
               "text-2xl font-semibold " +
               (isComplete
-                ? "text-emerald-400"
+                ? "text-cyan-300"
                 : isHot
                   ? "text-accent text-glow"
                   : "text-text-primary")
@@ -97,7 +97,7 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
             className={
               "h-full rounded-full " +
               (isComplete
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                ? "bg-gradient-to-r from-cyan-500 to-cyan-300"
                 : isHot
                   ? "bg-gradient-to-r from-accent to-accent-hover"
                   : "bg-text-muted")

@@ -11,7 +11,7 @@ import { QuickCollect } from "@/components/QuickCollect";
 import { TheFocusRoom } from "@/components/TheFocusRoom";
 import { getCompletedTasksCount } from "@/lib/project-utils";
 import { quantumGradientClasses } from "@/lib/quantum-theme";
-import { Plus, Zap, Target, Brain } from "lucide-react";
+import { Plus, Zap, Target, Brain, Activity } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { TaskStatus } from "@/types/project";
 import { AppModal } from "@/components/AppModal";
@@ -152,7 +152,6 @@ export default function Dashboard() {
       title: "Новый проект",
       description: "Создать проект с задачами",
       icon: Plus,
-      color: "from-purple-500 to-blue-500",
       onClick: () => router.push("/focus/new"),
     },
     {
@@ -160,7 +159,6 @@ export default function Dashboard() {
       title: "Быстрый сбор",
       description: "Записать идею или задачу",
       icon: Zap,
-      color: "from-blue-500 to-cyan-500",
       onClick: () => {
         window.dispatchEvent(new Event("quick-collect:open"));
         const quickCollect = document.getElementById("quick-collect");
@@ -174,7 +172,6 @@ export default function Dashboard() {
       title: "Новая задача",
       description: "Добавить задачу в проект",
       icon: Target,
-      color: "from-purple-500 to-pink-500",
       onClick: handleOpenAddTask,
     },
     {
@@ -182,7 +179,6 @@ export default function Dashboard() {
       title: "Быстрый фокус",
       description: "Начать сессию фокуса",
       icon: Brain,
-      color: "from-cyan-500 to-blue-500",
       onClick: handleQuickFocus,
     },
   ];
@@ -224,45 +220,58 @@ export default function Dashboard() {
     <>
       {currentProjectId && <TheFocusRoom />}
 
-      <div className="p-6 md:p-12 animate-in fade-in duration-300 text-white">
+      <div className="p-6 md:p-10 animate-in fade-in duration-300 text-white">
         {/* Заголовок */}
-        <header className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className={quantumGradientClasses.text}>Главная панель</span>
-          </h1>
-          <p className="text-lg text-qf-text-secondary max-w-2xl">
-            Добро пожаловать в Focus Flow. Здесь вы найдете все ваши проекты, задачи и статистику продуктивности.
-          </p>
+        <header className="mb-10">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-3">
+              <h1 className="text-5xl font-bold">
+                Квантовый обзор
+              </h1>
+              <p className="text-base md:text-lg text-qf-text-secondary max-w-2xl">
+                Добро пожаловать в пространство суперпозиции продуктивности.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 self-start lg:items-end shrink-0">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/35 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300">
+                <Activity className="h-3.5 w-3.5" />
+                Система активна
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-qf-border-primary bg-qf-bg-secondary/80 px-3 py-1.5 text-[11px] uppercase tracking-wide text-qf-text-secondary font-mono">
+                v2.8.3 • Quantum Mode
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Виджеты реального времени */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Обзор</h2>
+        <section className="mb-10">
+          <h2 className="text-2xl font-bold mb-6 tracking-wide">ОБЗОР</h2>
           <QuantumWidgets />
         </section>
 
         {/* Быстрые действия */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Быстрые действия</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h2 className="text-2xl font-bold mb-6 tracking-wide">БЫСТРЫЕ ДЕЙСТВИЯ</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {quickActions.map((action) => (
               <button
                 key={action.id}
                 onClick={action.onClick}
-                className={`bg-gradient-to-br ${action.color} rounded-2xl p-6 text-left transition-all duration-300 hover:shadow-qf-glow hover:translate-y-[-2px] group`}
+                className="qf-shell-card rounded-2xl p-6 text-left transition-all duration-300 hover:translate-y-[-3px] group"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-white/20 rounded-xl">
+                  <div className="p-3 rounded-xl border border-qf-border-secondary bg-qf-gradient-primary">
                     <action.icon className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white">{action.title}</h3>
-                    <p className="text-sm text-white/80">{action.description}</p>
+                    <h3 className="font-bold text-white tracking-wide">{action.title}</h3>
+                    <p className="text-sm text-qf-text-secondary">{action.description}</p>
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                    <Plus className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-full border border-qf-border-primary bg-qf-bg-secondary/60 flex items-center justify-center group-hover:border-qf-border-accent transition-colors">
+                    <Plus className="w-4 h-4 text-qf-text-secondary group-hover:text-white" />
                   </div>
                 </div>
               </button>
@@ -273,7 +282,7 @@ export default function Dashboard() {
         {/* Сетка проектов */}
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Ваши проекты</h2>
+            <h2 className="text-2xl font-bold tracking-wide">ПРОЕКТЫ</h2>
             <div className="text-sm text-qf-text-muted">
               {projects.length} {projects.length === 1 ? "проект" : projects.length < 5 ? "проекта" : "проектов"}
             </div>
@@ -284,15 +293,15 @@ export default function Dashboard() {
         {/* Статистика продуктивности */}
         {projects.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">Статистика продуктивности</h2>
+            <h2 className="text-2xl font-bold mb-6 tracking-wide">СТАТИСТИКА</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-qf-bg-secondary rounded-2xl p-6 border border-qf-border-glass">
+              <div className="qf-shell-card rounded-2xl p-6 border border-qf-border-glass">
                 <h3 className="font-bold mb-4">Распределение по статусам</h3>
                 <div className="space-y-4">
                   {[
-                    { label: "В работе", value: projectStats.active, color: "bg-blue-500" },
-                    { label: "Завершены", value: projectStats.completed, color: "bg-purple-500" },
-                    { label: "Не начаты", value: projectStats.notStarted, color: "bg-gray-500" },
+                    { label: "В работе", value: projectStats.active, color: "bg-cyan-400" },
+                    { label: "Завершены", value: projectStats.completed, color: "bg-cyan-300" },
+                    { label: "Не начаты", value: projectStats.notStarted, color: "bg-cyan-200" },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -304,13 +313,13 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-              <div className="bg-qf-bg-secondary rounded-2xl p-6 border border-qf-border-glass">
+              <div className="qf-shell-card rounded-2xl p-6 border border-qf-border-glass">
                 <h3 className="font-bold mb-4">Прогресс по приоритетам</h3>
                 <div className="space-y-4">
                   {[
-                    { label: "Высокий", value: projectStats.highPriority, color: "bg-red-500" },
-                    { label: "Средний", value: projectStats.mediumPriority, color: "bg-yellow-500" },
-                    { label: "Низкий", value: projectStats.lowPriority, color: "bg-green-500" },
+                    { label: "Высокий", value: projectStats.highPriority, color: "bg-cyan-400" },
+                    { label: "Средний", value: projectStats.mediumPriority, color: "bg-cyan-300" },
+                    { label: "Низкий", value: projectStats.lowPriority, color: "bg-cyan-200" },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -322,7 +331,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-              <div className="bg-qf-bg-secondary rounded-2xl p-6 border border-qf-border-glass">
+              <div className="qf-shell-card rounded-2xl p-6 border border-qf-border-glass">
                 <h3 className="font-bold mb-4">Общая статистика</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between">
@@ -345,7 +354,6 @@ export default function Dashboard() {
 
         {/* Quick Collect */}
         <section id="quick-collect" className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Быстрый сбор идей</h2>
           <QuickCollect />
         </section>
       </div>

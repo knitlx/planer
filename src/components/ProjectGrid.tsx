@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Project } from "@/types/project";
 import { getCompletedTasksCount, getPriorityLabel } from "@/lib/project-utils";
-import { quantumGlass, quantumGradientClasses, getStatusByProgress, getStatusColor } from "@/lib/quantum-theme";
+import { quantumGradientClasses, getStatusByProgress, getStatusColor } from "@/lib/quantum-theme";
 import { Target, Calendar, ArrowRight } from "lucide-react";
 
 interface ProjectGridProps {
@@ -15,9 +15,9 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
   const router = useRouter();
 
   const getPriorityColor = (weight: number) => {
-    if (weight >= 8) return "bg-red-500/20 text-red-400";
-    if (weight >= 5) return "bg-yellow-500/20 text-yellow-400";
-    return "bg-green-500/20 text-green-400";
+    if (weight >= 8) return "bg-cyan-900/30 text-cyan-400 border border-cyan-700/30";
+    if (weight >= 5) return "bg-purple-900/30 text-purple-400 border border-purple-700/30";
+    return "bg-green-900/30 text-green-400 border border-green-700/30";
   };
 
   const formatDate = (dateValue?: string | Date) => {
@@ -30,8 +30,8 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
 
   if (projects.length === 0) {
     return (
-      <div className={`${quantumGlass.base} rounded-2xl p-12 text-center border border-qf-border-glass`}>
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500/10 to-blue-500/10 flex items-center justify-center">
+      <div className="project-card-shell rounded-2xl p-12 text-center">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-qf-gradient-subtle border border-qf-border-secondary flex items-center justify-center">
           <Target className="w-8 h-8 text-qf-text-muted" />
         </div>
         <h3 className="text-xl font-bold mb-3">Нет проектов</h3>
@@ -61,7 +61,7 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
           <div
             key={project.id}
             onClick={() => onSelectProject(project.id)}
-            className={`${quantumGlass.base} rounded-2xl p-6 border border-qf-border-glass cursor-pointer transition-all duration-300 hover:border-qf-border-accent hover:shadow-qf-glow hover:translate-y-[-4px] group`}
+            className="project-card-shell rounded-3xl p-6 cursor-pointer group"
           >
             {/* Заголовок и прогресс */}
             <div className="flex justify-between items-start mb-6">
@@ -85,10 +85,10 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold mb-1">
+                <div className="text-5xl font-bold mb-1 leading-none">
                   <span className={quantumGradientClasses.text}>{project.progress}</span>
                 </div>
-                <div className="text-[10px] text-qf-text-muted uppercase tracking-tighter">%</div>
+                <div className="text-xs text-qf-text-muted">Прогресс</div>
               </div>
             </div>
 
@@ -105,9 +105,9 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
                 <span>Прогресс</span>
                 <span>{project.progress}%</span>
               </div>
-              <div className="w-full h-2 bg-qf-bg-tertiary rounded-full overflow-hidden">
+              <div className="quantum-progress">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
+                  className="quantum-progress-fill transition-all duration-500"
                   style={{ width: `${project.progress}%` }}
                 />
               </div>
@@ -139,8 +139,8 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
                   {project.createdAt ? formatDate(project.createdAt) : "Недавно"}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-qf-text-accent group-hover:gap-3 transition-all">
-                <span className="text-sm font-medium">Открыть</span>
+              <div className="flex items-center gap-2 text-cyan-400 group-hover:gap-3 transition-all">
+                <span className="text-sm font-medium">Продолжить</span>
                 <ArrowRight className="w-4 h-4" />
               </div>
             </div>

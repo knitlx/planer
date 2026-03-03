@@ -11,6 +11,7 @@ import {
 } from "@/lib/api-validation";
 
 const IDEA_ACTIONS = ["convert_to_task", "convert_to_project", "archive"] as const;
+const IDEA_CONVERSION_TITLE_MAX_LENGTH = 2000;
 
 export async function PUT(
   request: Request,
@@ -30,7 +31,7 @@ export async function PUT(
     const payload = assertRecord(body);
     action = parseEnumValue(payload.action, "action", IDEA_ACTIONS);
     targetProjectId = parseOptionalString(payload.targetProjectId, "targetProjectId", 100);
-    title = parseOptionalString(payload.title, "title", 500);
+    title = parseOptionalString(payload.title, "title", IDEA_CONVERSION_TITLE_MAX_LENGTH);
     projectName = parseOptionalString(payload.projectName, "projectName", 120);
     weight = parseOptionalInt(payload.weight, "weight", 1, 10);
   } catch (error) {

@@ -123,7 +123,7 @@ export function RadarCard({ project, onSelect }: RadarCardProps) {
               <motion.div
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
-                className="px-2 py-1 text-xs font-semibold bg-orange-500/20 text-orange-400 rounded-full"
+                className="px-2 py-1 text-xs font-semibold bg-qf-gradient-subtle text-cyan-300 border border-qf-border-primary rounded-full"
               >
                 Простаивает
               </motion.div>
@@ -143,9 +143,9 @@ export function RadarCard({ project, onSelect }: RadarCardProps) {
               {project.progress}%
             </span>
           </div>
-          <div className="w-full bg-white/10 rounded-full h-2">
+          <div className="w-full quantum-progress">
             <motion.div
-              className="bg-accent h-2 rounded-full"
+              className="quantum-progress-fill"
               initial={{ width: 0 }}
               animate={{ width: `${project.progress}%` }}
               transition={{ duration: 0.8, ease: "easeOut" }}

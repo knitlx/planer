@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { TaskBoard } from "@/components/TaskBoard";
-import type { ProjectWithMeta, Task } from "@/types/project";
+import type { ProjectWithMeta, Task, TaskStatus } from "@/types/project";
 import { TASK_STATUS } from "@/lib/project-utils";
 import { AppModal } from "@/components/AppModal";
 
@@ -116,6 +116,43 @@ export default function FocusProjectPage() {
     }
   };
 
+  const handleRenameTask = async (taskId: string, title: string) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось обновить задачу");
+      }
+
+      toast.success("Задача обновлена");
+      await fetchProjectData();
+    } catch {
+      toast.error("Ошибка обновления задачи");
+    }
+  };
+
+  const handleMoveTask = async (taskId: string, status: TaskStatus) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось обновить статус задачи");
+      }
+
+      await fetchProjectData();
+    } catch {
+      toast.error("Ошибка перемещения задачи");
+    }
+  };
+
   const handleSaveSettings = async () => {
     if (!project) return;
 
@@ -176,6 +213,8 @@ export default function FocusProjectPage() {
         onAddTask={handleAddTask}
         onCompleteTask={handleCompleteTask}
         onStartTask={handleStartTask}
+        onRenameTask={handleRenameTask}
+        onMoveTask={handleMoveTask}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

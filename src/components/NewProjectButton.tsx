@@ -24,13 +24,13 @@ export function NewProjectButton() {
     <>
       <Button
         onClick={() => setIsDialogOpen(true)}
-        className="bg-accent hover:bg-accent-hover text-black font-medium"
+        className="bg-qf-gradient-primary text-white font-medium hover:opacity-90"
       >
         + Новый проект
       </Button>
 
       {isDialogOpen && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="card p-5 w-full max-w-sm">
             <h2 className="text-base font-semibold mb-4 text-text-primary">
               Новый проект
@@ -45,7 +45,7 @@ export function NewProjectButton() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Название..."
-                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-text-primary placeholder:text-text-muted focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full px-3 py-2 text-sm bg-qf-bg-secondary border border-qf-border-primary rounded-lg text-text-primary placeholder:text-text-muted focus:ring-1 focus:ring-qf-border-accent focus:border-qf-border-accent"
                   autoFocus
                 />
               </div>
@@ -60,7 +60,7 @@ export function NewProjectButton() {
                   max="100"
                   value={weight}
                   onChange={(e) => setWeight(Number(e.target.value))}
-                  className="w-full accent-accent"
+                  className="w-full accent-cyan-400"
                 />
               </div>
 
@@ -70,7 +70,7 @@ export function NewProjectButton() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsDialogOpen(false)}
-                  className="flex-1 border-white/10 text-text-secondary hover:text-text-primary hover:bg-white/5"
+                  className="flex-1 border-qf-border-primary text-text-secondary hover:text-text-primary hover:bg-[rgba(138,43,226,0.1)]"
                 >
                   Отмена
                 </Button>
@@ -78,7 +78,7 @@ export function NewProjectButton() {
                   type="submit"
                   size="sm"
                   disabled={!name.trim()}
-                  className="flex-1 bg-accent hover:bg-accent-hover text-black font-medium"
+                  className="flex-1 bg-qf-gradient-primary text-white font-medium hover:opacity-90"
                 >
                   Создать
                 </Button>

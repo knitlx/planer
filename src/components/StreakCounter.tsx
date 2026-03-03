@@ -31,7 +31,7 @@ export function StreakCounter() {
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl text-white shadow-lg shadow-orange-500/25"
+      className="flex items-center gap-2 px-4 py-2 bg-qf-gradient-primary rounded-xl text-white shadow-lg shadow-cyan-500/20 border border-qf-border-primary"
     >
       <Flame
         className={`w-5 h-5 ${hasWorkedToday ? "animate-pulse" : "opacity-50"}`}

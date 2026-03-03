@@ -46,16 +46,16 @@ export default function ReviewPage() {
                 {inProgressProjects.map((project) => (
                   <div
                     key={project.id}
-                    className="flex items-center gap-4 p-3 bg-white/5 rounded-lg"
+                    className="flex items-center gap-4 p-3 bg-qf-bg-secondary/70 border border-qf-border-secondary rounded-lg"
                   >
                     <div className="flex-1">
                       <h3 className="font-semibold text-text-primary">
                         {project.name}
                       </h3>
                       <div className="flex items-center gap-2 mt-2">
-                        <div className="flex-1 bg-white/10 rounded-full h-2">
+                        <div className="flex-1 quantum-progress">
                           <div
-                            className="bg-accent h-2 rounded-full"
+                            className="quantum-progress-fill h-2"
                             style={{ width: `${project.progress}%` }}
                           />
                         </div>
@@ -95,8 +95,8 @@ export default function ReviewPage() {
           )}
 
           {staleProjects.length > 0 && (
-            <div className="card p-6 border-orange-500/30">
-              <h2 className="text-lg font-semibold text-orange-400 mb-4">
+            <div className="card p-6 border-qf-border-primary">
+              <h2 className="text-lg font-semibold text-cyan-300 mb-4">
                 Без активности
               </h2>
               <div className="space-y-2">
@@ -105,7 +105,7 @@ export default function ReviewPage() {
                     key={project.id}
                     className="flex items-center gap-3 p-3 text-text-muted"
                   >
-                    <span className="text-orange-400">⏰</span>
+                    <span className="text-cyan-300">⏰</span>
                     <span>{project.name}</span>
                     <span className="text-xs">
                       (

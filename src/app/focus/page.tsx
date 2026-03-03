@@ -34,7 +34,7 @@ export default function FocusPage() {
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-qf-gradient-primary flex items-center justify-center">
               <Flame className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -69,7 +69,7 @@ export default function FocusPage() {
                       onClick={() => handleEnterFocus(project.id)}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-qf-gradient-subtle border border-qf-border-secondary flex items-center justify-center">
                           <span className="text-lg font-bold text-accent">
                             {project.focusScore ?? 0}
                           </span>

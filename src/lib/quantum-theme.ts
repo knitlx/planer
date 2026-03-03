@@ -18,56 +18,56 @@
 
 export const quantumColors = {
   // Основные цвета градиента
-  purple: "#8B5CF6",
-  blue: "#06B6D4",
+  purple: "#8A2BE2",
+  blue: "#00E5FF",
 
   // Фоны
   background: {
-    primary: "#0A0A0F",
-    secondary: "#121218",
-    tertiary: "#1A1A22",
-    glass: "rgba(18, 18, 24, 0.8)",
+    primary: "#000000",
+    secondary: "#0F0F14",
+    tertiary: "#161623",
+    glass: "rgba(15, 15, 20, 0.85)",
   },
 
   // Текст
   text: {
     primary: "#FFFFFF",
-    secondary: "#A0A0B0",
-    muted: "#6B6B7A",
-    accent: "#8B5CF6",
+    secondary: "#9EA0B5",
+    muted: "#767A93",
+    accent: "#00E5FF",
   },
 
   // Границы
   border: {
-    primary: "rgba(255, 255, 255, 0.1)",
-    secondary: "rgba(255, 255, 255, 0.05)",
-    accent: "rgba(139, 92, 246, 0.3)",
-    glass: "rgba(255, 255, 255, 0.15)",
+    primary: "rgba(138, 43, 226, 0.25)",
+    secondary: "rgba(255, 255, 255, 0.08)",
+    accent: "rgba(0, 229, 255, 0.4)",
+    glass: "rgba(138, 43, 226, 0.3)",
   },
 
   // Статусы
   status: {
     high: {
-      bg: "rgba(239, 68, 68, 0.15)",
-      text: "#EF4444",
+      bg: "rgba(0, 229, 255, 0.16)",
+      text: "#6EEFFF",
     },
     medium: {
-      bg: "rgba(245, 158, 11, 0.15)",
-      text: "#F59E0B",
+      bg: "rgba(0, 229, 255, 0.13)",
+      text: "#52E7FF",
     },
     low: {
-      bg: "rgba(34, 197, 94, 0.15)",
-      text: "#22C55E",
+      bg: "rgba(0, 229, 255, 0.11)",
+      text: "#3DDEFA",
     },
     completed: {
-      bg: "rgba(139, 92, 246, 0.15)",
-      text: "#8B5CF6",
+      bg: "rgba(0, 229, 255, 0.18)",
+      text: "#00E5FF",
     },
   },
 
   // Эффекты
   effects: {
-    glow: "rgba(139, 92, 246, 0.3)",
+    glow: "rgba(138, 43, 226, 0.35)",
     shadow: "rgba(0, 0, 0, 0.25)",
     overlay: "rgba(10, 10, 15, 0.7)",
   },
@@ -187,7 +187,7 @@ export const quantumCSSVars = {
  * Готовые классы для стеклянных эффектов
  */
 export const quantumGlass = {
-  base: "backdrop-blur-lg bg-qf-bg-glass border-qf-border-glass",
+  base: "qf-shell-card",
   light: "backdrop-blur-md bg-white/5 border-white/10",
   dark: "backdrop-blur-xl bg-black/20 border-white/5",
 } as const;
@@ -228,24 +228,26 @@ export type QuantumStatus = keyof typeof quantumColors.status;
 export const quantumNavigationClasses = {
   // Основные стили ссылок
   link: {
-    base: "flex items-center gap-3 px-3 py-2.5 text-sm text-left transition-all duration-300 rounded-lg",
-    active: "bg-qf-gradient-subtle text-white border border-qf-border-accent",
-    inactive: "text-qf-text-secondary hover:text-white hover:bg-white/5",
+    base: "relative flex items-center gap-3 px-3 py-2.5 text-sm text-left transition-all duration-300 rounded-xl border border-transparent",
+    active:
+      "bg-[linear-gradient(135deg,rgba(138,43,226,0.24),rgba(0,229,255,0.12))] text-white border-qf-border-accent shadow-[0_0_0_1px_rgba(0,229,255,0.18)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[3px] before:rounded-full before:bg-cyan-300",
+    inactive: "text-qf-text-secondary hover:text-white hover:bg-white/5 hover:border-qf-border-secondary",
     icon: "w-5 h-5",
   },
 
   // Стили для проектов в сайдбаре
   project: {
-    base: "w-full flex items-center justify-between px-3 py-2 text-sm transition-colors rounded-lg hover:bg-white/5 group",
-    dot: "w-1.5 h-1.5 rounded-full",
-    progress: "text-[10px] opacity-60 group-hover:opacity-100",
+    base: "w-full flex items-center justify-between px-3 py-2 text-sm transition-all rounded-xl border border-transparent hover:bg-white/5 hover:border-qf-border-secondary group",
+    dot: "w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]",
+    progress: "text-[10px] opacity-60 group-hover:opacity-100 font-mono",
   },
 
   // Стили для кнопок навигации
   button: {
-    primary: "bg-qf-gradient-primary hover:opacity-90 transition-opacity",
+    primary:
+      "bg-qf-gradient-primary text-black hover:opacity-95 transition-opacity shadow-[0_0_20px_rgba(0,229,255,0.25)]",
     secondary:
-      "bg-qf-bg-secondary hover:bg-qf-bg-tertiary border border-qf-border-primary",
+      "bg-qf-bg-secondary/80 hover:bg-qf-bg-tertiary border border-qf-border-primary",
   },
 
   // Стили для заголовков секций
@@ -256,10 +258,10 @@ export const quantumNavigationClasses = {
 
   // Стили для статусных индикаторов
   status: {
-    high: "bg-green-500",
-    medium: "bg-yellow-500",
-    low: "bg-cyan-500",
-    completed: "bg-purple-500",
+    high: "bg-cyan-400",
+    medium: "bg-cyan-300",
+    low: "bg-cyan-200",
+    completed: "bg-cyan-300",
   },
 } as const;
 

@@ -15,3 +15,5 @@ old-design.html
 design-prototypes/
 screenshot*.png
 docs/
+playwright-report/
+test-results/

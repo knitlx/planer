@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { QuantumSidebar } from "@/components/QuantumSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-const inter = Inter({
-  subsets: ["latin", "cyrillic"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-inter",
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
 });
 
 export const metadata: Metadata = {
@@ -22,11 +28,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" suppressHydrationWarning className={inter.variable}>
+    <html
+      lang="ru"
+      suppressHydrationWarning
+      className={`${spaceGrotesk.variable} ${jetBrainsMono.variable}`}
+    >
       <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <div className="quantum-bg" aria-hidden />
           <QuantumSidebar />
-          <main className="md:pl-64 min-h-screen text-white">{children}</main>
+          <main className="lg:pl-64 min-h-screen text-white pt-16 lg:pt-0">{children}</main>
           <Toaster />
         </ThemeProvider>
       </body>

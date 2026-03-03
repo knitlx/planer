@@ -47,13 +47,13 @@ export function ProjectHeader({
 
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-qf-border-secondary text-xs text-qf-text-secondary mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-qf-bg-secondary/80 border border-qf-border-secondary text-xs text-qf-text-secondary mb-4">
             <Sparkles className="w-3 h-3" />
             Focus Flow
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">{project.name}</h1>
           <div className="flex items-center gap-3">
-            <span className="text-xs px-2 py-1 rounded-full bg-white/5 border border-qf-border-secondary">
+            <span className="text-xs px-2 py-1 rounded-full bg-qf-bg-secondary/80 border border-qf-border-secondary">
               Вес: {project.weight}
             </span>
             <span
@@ -66,7 +66,7 @@ export function ProjectHeader({
         </div>
 
         <div className="grid grid-cols-3 gap-4 w-full lg:w-auto">
-          <div className="rounded-xl bg-white/5 border border-qf-border-secondary px-4 py-3 text-center">
+          <div className="rounded-xl bg-qf-bg-secondary/80 border border-qf-border-secondary px-4 py-3 text-center">
             <div className={`text-2xl font-bold ${quantumGradientClasses.text}`}>
               {project.progress}%
             </div>
@@ -74,13 +74,13 @@ export function ProjectHeader({
               Прогресс
             </div>
           </div>
-          <div className="rounded-xl bg-white/5 border border-qf-border-secondary px-4 py-3 text-center">
+          <div className="rounded-xl bg-qf-bg-secondary/80 border border-qf-border-secondary px-4 py-3 text-center">
             <div className="text-2xl font-bold">{totalTasks}</div>
             <div className="text-[10px] uppercase tracking-wider text-qf-text-muted">
               Задачи
             </div>
           </div>
-          <div className="rounded-xl bg-white/5 border border-qf-border-secondary px-4 py-3 text-center">
+          <div className="rounded-xl bg-qf-bg-secondary/80 border border-qf-border-secondary px-4 py-3 text-center">
             <div className="text-2xl font-bold">{completedTasks}</div>
             <div className="text-[10px] uppercase tracking-wider text-qf-text-muted">
               Выполнено
