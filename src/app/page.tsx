@@ -224,7 +224,7 @@ export default function Dashboard() {
     <>
       {currentProjectId && <TheFocusRoom />}
 
-      <div className="p-6 md:p-12 animate-in fade-in duration-300">
+      <div className="p-6 md:p-12 animate-in fade-in duration-300 text-white">
         {/* Заголовок */}
         <header className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
