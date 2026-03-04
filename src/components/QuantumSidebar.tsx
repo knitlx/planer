@@ -31,10 +31,19 @@ export function QuantumSidebar() {
   const router = useRouter();
   const { projects, fetchProjects, isLoading, error } = useProjectStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [quickCollectOpen, setQuickCollectOpen] = useState(false);
+  const [quickCollectContent, setQuickCollectContent] = useState("");
+  const [isSubmittingQuickCollect, setIsSubmittingQuickCollect] = useState(false);
 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  useEffect(() => {
+    const handler = () => setQuickCollectOpen(true);
+    window.addEventListener("quick-collect:open", handler);
+    return () => window.removeEventListener("quick-collect:open", handler);
+  }, []);
 
   const handleNewProject = () => {
     setMobileMenuOpen(false);
@@ -43,10 +52,23 @@ export function QuantumSidebar() {
 
   const handleQuickCollect = () => {
     setMobileMenuOpen(false);
-    window.dispatchEvent(new Event("quick-collect:open"));
-    const quickCollect = document.getElementById("quick-collect");
-    if (quickCollect) {
-      quickCollect.scrollIntoView({ behavior: "smooth" });
+    setQuickCollectOpen(true);
+  };
+
+  const submitQuickCollect = async () => {
+    if (!quickCollectContent.trim()) return;
+    setIsSubmittingQuickCollect(true);
+    try {
+      const response = await fetch("/api/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: quickCollectContent.trim(), source: "Web" }),
+      });
+      if (!response.ok) throw new Error("Не удалось сохранить");
+      setQuickCollectContent("");
+      setQuickCollectOpen(false);
+    } finally {
+      setIsSubmittingQuickCollect(false);
     }
   };
 
@@ -150,6 +172,37 @@ export function QuantumSidebar() {
             </Button>
           </div>
         </div>
+      </AppModal>
+
+      <AppModal
+        open={quickCollectOpen}
+        title="Быстрый сбор"
+        onClose={() => setQuickCollectOpen(false)}
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setQuickCollectOpen(false)}
+              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+            >
+              Отмена
+            </button>
+            <button
+              onClick={() => void submitQuickCollect()}
+              disabled={isSubmittingQuickCollect || !quickCollectContent.trim()}
+              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
+            >
+              {isSubmittingQuickCollect ? "Сохранение..." : "Сохранить"}
+            </button>
+          </div>
+        }
+      >
+        <textarea
+          value={quickCollectContent}
+          onChange={(event) => setQuickCollectContent(event.target.value)}
+          rows={4}
+          placeholder="Запишите идею, мысль или задачу..."
+          className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent resize-none"
+        />
       </AppModal>
 
       <aside className="hidden lg:flex w-64 h-screen flex-col fixed left-0 top-0 z-10 quantum-glass border-r border-quantum">

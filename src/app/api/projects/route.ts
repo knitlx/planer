@@ -2,16 +2,29 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
+  parseOptionalEnumValue,
   parseOptionalInt,
+  parseOptionalString,
   parseRequiredString,
   ValidationError,
   validationError,
 } from "@/lib/api-validation";
 
+function parseOptionalDate(value: unknown, fieldName: string): Date | undefined {
+  if (value === undefined || value === null) return undefined;
+  const raw = parseOptionalString(value, fieldName, 64);
+  if (!raw) return undefined;
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    throw new ValidationError(`${fieldName} must be a valid date`);
+  }
+  return date;
+}
+
 export async function GET() {
   try {
     const projects = await prisma.project.findMany({
-      include: { tasks: true },
+      include: { tasks: { orderBy: { order: "asc" } } },
       orderBy: { updatedAt: "desc" },
     });
 
@@ -53,11 +66,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const payload = assertRecord(body);
     const name = parseRequiredString(payload.name, "name", 1, 120);
+    const description = parseOptionalString(payload.description, "description", 4000);
     const weight = parseOptionalInt(payload.weight, "weight", 1, 10) ?? 5;
     const friction = parseOptionalInt(payload.friction, "friction", 1, 10) ?? 5;
+    const deadline = parseOptionalDate(payload.deadline, "deadline");
+    const status = parseOptionalEnumValue(payload.status, "status", [
+      "INCUBATOR",
+      "ACTIVE",
+      "SNOOZED",
+      "FINAL_STRETCH",
+    ] as const);
 
     const project = await prisma.project.create({
-      data: { name, weight, friction },
+      data: { name, description: description || null, weight, friction, deadline, status },
     });
     return NextResponse.json(project, { status: 201 });
   } catch (error: any) {

@@ -226,10 +226,10 @@ export default function Dashboard() {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-3">
               <h1 className="text-5xl font-bold">
-                Квантовый обзор
+                Обзор дня
               </h1>
               <p className="text-base md:text-lg text-qf-text-secondary max-w-2xl">
-                Добро пожаловать в пространство суперпозиции продуктивности.
+                Главное по проектам и задачам в одном месте.
               </p>
             </div>
             <div className="flex flex-col gap-3 self-start lg:items-end shrink-0">
@@ -237,22 +237,19 @@ export default function Dashboard() {
                 <Activity className="h-3.5 w-3.5" />
                 Система активна
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-qf-border-primary bg-qf-bg-secondary/80 px-3 py-1.5 text-[11px] uppercase tracking-wide text-qf-text-secondary font-mono">
-                v2.8.3 • Quantum Mode
-              </div>
             </div>
           </div>
         </header>
 
         {/* Виджеты реального времени */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-6 tracking-wide">ОБЗОР</h2>
+          <h2 className="text-2xl font-bold mb-6 tracking-wide">Обзор</h2>
           <QuantumWidgets />
         </section>
 
         {/* Быстрые действия */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 tracking-wide">БЫСТРЫЕ ДЕЙСТВИЯ</h2>
+          <h2 className="text-2xl font-bold mb-6 tracking-wide">Действия</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {quickActions.map((action) => (
               <button

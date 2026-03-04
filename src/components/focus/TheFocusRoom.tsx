@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useFocusStore } from "@/store/useFocusStore";
 import { useProjectStore } from "@/store/useProjectStore";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/utils";
 
 export function TheFocusRoom() {
+  const router = useRouter();
   const {
     currentProjectId,
     currentTaskId,
+    sessionStartTime,
     timerElapsed,
     sessionDuration,
     updateTimer,
@@ -27,12 +30,29 @@ export function TheFocusRoom() {
   const sessionProgress =
     sessionDuration > 0 ? (timerElapsed / sessionDuration) * 100 : 0;
 
+  useEffect(() => {
+    if (!sessionStartTime) return;
+    const tick = () => updateTimer(Date.now() - sessionStartTime);
+    tick();
+    const intervalId = window.setInterval(tick, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [sessionStartTime, updateTimer]);
+
+  const leaveFocusRoom = (projectId?: string | null) => {
+    stopFocus();
+    if (projectId) {
+      router.push(`/focus/${projectId}`);
+      return;
+    }
+    router.push("/projects");
+  };
+
   const handleStop = async () => {
-    const sessionNote = prompt("Write a quick note for your next session:");
+    const sessionNote = prompt("Короткая заметка для следующей сессии:");
     if (!sessionNote) return;
 
     await updateProjectStatus(currentProjectId!, "SNOOZED", sessionNote);
-    stopFocus();
+    leaveFocusRoom(currentProjectId);
   };
 
   if (!project) return null;
@@ -57,7 +77,7 @@ export function TheFocusRoom() {
           <h1 className="text-4xl font-bold text-white mb-4">{project.name}</h1>
           {project.lastSessionNote && (
             <div className="bg-qf-bg-glass backdrop-blur-xl rounded-xl p-4 text-qf-text-secondary italic border-l-4 border-cyan-400 border border-qf-border-secondary">
-              "Last time: {project.lastSessionNote}"
+              "Прошлая заметка: {project.lastSessionNote}"
             </div>
           )}
         </motion.div>
@@ -94,7 +114,7 @@ export function TheFocusRoom() {
 
               {currentTask.contextSummary && (
                 <div className="bg-qf-bg-secondary/80 rounded-lg p-3 text-sm text-qf-text-secondary mb-4 border border-qf-border-secondary">
-                  <span className="font-semibold">Context:</span>{" "}
+                  <span className="font-semibold">Контекст:</span>{" "}
                   {currentTask.contextSummary}
                 </div>
               )}
@@ -102,7 +122,7 @@ export function TheFocusRoom() {
           )}
         </AnimatePresence>
 
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <Button
             variant={isStuckMode ? "default" : "outline"}
             onClick={() => setStuckMode(!isStuckMode)}
@@ -112,10 +132,17 @@ export function TheFocusRoom() {
                 : "text-white border-qf-border-primary hover:border-qf-border-accent"
             }
           >
-            {isStuckMode ? "✓ Feeling better" : "I'm stuck → Simplify"}
+            {isStuckMode ? "Стало лучше" : "Застрял(а) -> Упростить"}
           </Button>
           <Button onClick={handleStop} className="text-white border border-qf-border-primary bg-qf-bg-secondary/80 hover:border-qf-border-accent">
-            Stop & Save
+            Остановить и сохранить
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => leaveFocusRoom(currentProjectId)}
+            className="text-white border-qf-border-primary hover:border-qf-border-accent"
+          >
+            Выйти без сохранения
           </Button>
         </div>
       </div>

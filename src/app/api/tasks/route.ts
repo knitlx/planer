@@ -4,6 +4,7 @@ import {
   assertRecord,
   parseOptionalEnumValue,
   parseOptionalNonNegativeInt,
+  parseOptionalString,
   parseRequiredString,
   ValidationError,
   validationError,
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
     const title = parseRequiredString(payload.title, "title", 1, 500);
     const type = parseOptionalEnumValue(payload.type, "type", TASK_TYPES) ?? "ACTION";
     const order = parseOptionalNonNegativeInt(payload.order, "order") ?? 0;
+    const contextSummary = parseOptionalString(payload.contextSummary, "contextSummary", 4000);
 
     const project = await prisma.project.findUnique({
       where: { id: projectId },
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const task = await prisma.task.create({
-      data: { projectId, title, type, order },
+      data: { projectId, title, type, order, contextSummary: contextSummary || null },
     });
     return NextResponse.json(task, { status: 201 });
   } catch (error: any) {
