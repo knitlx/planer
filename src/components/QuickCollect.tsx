@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 export function QuickCollect() {
+  const shortcutHintId = "quick-collect-shortcut-hint";
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inboxCount, setInboxCount] = useState(0);
@@ -80,6 +81,9 @@ export function QuickCollect() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
+          <label htmlFor="quick-collect-input" className="sr-only">
+            Быстрый ввод идеи
+          </label>
           <input
             id="quick-collect-input"
             type="text"
@@ -89,6 +93,7 @@ export function QuickCollect() {
               if (event.key === "Enter") handleSubmit();
             }}
             placeholder="Запишите идею, мысль или задачу..."
+            aria-describedby={shortcutHintId}
             className="flex-1 px-4 py-3 rounded-xl bg-gray-900/50 border border-quantum focus:border-cyan-500/50 focus:outline-none transition-colors"
             disabled={isSubmitting}
           />
@@ -101,15 +106,15 @@ export function QuickCollect() {
           </button>
         </div>
 
-        <div className="mt-4 text-sm text-dim">
-          Используйте ⌘K для быстрого доступа к сбору идей из любого места
+        <div id={shortcutHintId} className="mt-4 text-sm text-dim">
+          Используйте Ctrl/⌘ + K для быстрого доступа к сбору идей из любого места
         </div>
       </div>
 
       <button
         onClick={focusInput}
         className="fixed bottom-6 right-4 md:bottom-8 md:right-8 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center shadow-[0_0_30px_rgba(0,229,255,0.4)] hover:scale-110 transition-transform z-40"
-        aria-label="QuickCollect"
+        aria-label="Открыть быстрый сбор"
       >
         <Plus className="w-6 h-6 text-black" strokeWidth={2.5} />
       </button>
