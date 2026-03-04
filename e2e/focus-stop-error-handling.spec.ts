@@ -36,13 +36,17 @@ test.describe("Focus room stop error handling", () => {
         });
       });
 
-      page.once("dialog", async (dialog) => {
-        expect(dialog.type()).toBe("confirm");
-        expect(dialog.message()).toContain("Simulated status error");
-        await dialog.accept();
+      let sawNativeDialog = false;
+      page.on("dialog", async (dialog) => {
+        sawNativeDialog = true;
+        await dialog.dismiss();
       });
 
       await page.getByRole("button", { name: "Остановить и сохранить" }).click();
+      const errorDialog = page.getByRole("dialog", { name: "Ошибка остановки сессии" });
+      await expect(errorDialog).toBeVisible();
+      await expect.poll(() => sawNativeDialog).toBe(false);
+      await errorDialog.getByRole("button", { name: "Выйти без сохранения" }).click();
       await expect(page).toHaveURL(new RegExp(`/focus/${projectId}$`));
     } finally {
       if (taskId) {

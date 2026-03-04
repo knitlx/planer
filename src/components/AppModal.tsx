@@ -112,6 +112,7 @@ export function AppModal({
           <button
             onClick={onClose}
             disabled={disableClose}
+            aria-label="Закрыть"
             className="w-8 h-8 rounded-lg border border-qf-border-secondary text-qf-text-muted hover:text-white hover:border-qf-border-primary transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4 mx-auto" />

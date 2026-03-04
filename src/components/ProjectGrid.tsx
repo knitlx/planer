@@ -34,7 +34,7 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
         <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-qf-gradient-subtle border border-qf-border-secondary flex items-center justify-center">
           <Target className="w-8 h-8 text-qf-text-muted" />
         </div>
-        <h3 className="text-xl font-bold mb-3">Нет проектов</h3>
+        <h2 className="text-xl font-bold mb-3">Нет проектов</h2>
         <p className="text-qf-text-secondary mb-6 max-w-md mx-auto">
           Создайте свой первый проект, чтобы начать работу с Focus Flow
         </p>
@@ -66,17 +66,18 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
         const totalTasks = project.tasks?.length || 0;
 
         return (
-          <div
+          <button
             key={project.id}
+            type="button"
             onClick={() => onSelectProject(project.id)}
-            className="project-card-shell rounded-3xl p-6 cursor-pointer group"
+            className="project-card-shell rounded-3xl p-6 cursor-pointer group text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-qf-border-accent focus-visible:ring-offset-2 focus-visible:ring-offset-qf-bg-primary"
           >
             {/* Заголовок и прогресс */}
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="font-bold text-lg mb-2 group-hover:text-qf-text-accent transition-colors">
+                <h2 className="font-bold text-lg mb-2 group-hover:text-qf-text-accent transition-colors">
                   {project.name}
-                </h3>
+                </h2>
                 <div className="flex items-center gap-2">
                   <span className={`text-xs px-2 py-1 rounded-full ${priorityColor}`}>
                     {getPriorityLabel(project.weight)}
@@ -152,7 +153,7 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
                 <ArrowRight className="w-4 h-4" />
               </div>
             </div>
-          </div>
+          </button>
         );
       })}
     </div>

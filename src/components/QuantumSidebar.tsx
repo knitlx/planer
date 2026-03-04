@@ -196,7 +196,11 @@ export function QuantumSidebar() {
           </div>
         }
       >
+        <label htmlFor="sidebar-quick-collect-textarea" className="sr-only">
+          Текст быстрой заметки
+        </label>
         <textarea
+          id="sidebar-quick-collect-textarea"
           value={quickCollectContent}
           onChange={(event) => setQuickCollectContent(event.target.value)}
           rows={4}
@@ -212,7 +216,7 @@ export function QuantumSidebar() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold gradient-text">FOCUS FLOW</h1>
+              <p className="text-xl font-bold gradient-text">FOCUS FLOW</p>
               <p className="text-xs text-qf-text-muted">QUANTUM EDITION</p>
             </div>
           </div>
@@ -220,7 +224,7 @@ export function QuantumSidebar() {
 
         <nav className="flex-1 p-4">
           <div className="mb-8">
-              <h3 className="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.42)] font-bold mb-3 px-2">НАВИГАЦИЯ</h3>
+                  <p className="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.42)] font-bold mb-3 px-2">НАВИГАЦИЯ</p>
               <div className="space-y-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
@@ -242,7 +246,7 @@ export function QuantumSidebar() {
 
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3 px-2">
-              <h3 className="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.42)] font-bold">ПРОЕКТЫ</h3>
+              <p className="text-xs uppercase tracking-wider text-[rgba(255,255,255,0.42)] font-bold">ПРОЕКТЫ</p>
               <button onClick={handleNewProject} className="text-xs text-cyan-400 hover:text-cyan-300">+ Новый</button>
             </div>
             {isLoading ? (
