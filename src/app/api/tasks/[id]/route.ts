@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { TaskService } from "@/services/TaskService";
 import {
   assertRecord,
+  apiError,
   parseOptionalEnumValue,
   parseOptionalNonNegativeInt,
   parseOptionalString,
@@ -36,7 +37,7 @@ export async function PUT(
       status === undefined &&
       order === undefined
     ) {
-      return validationError("At least one field is required");
+      return validationError("Нужно передать хотя бы одно поле для обновления");
     }
 
     const task = await prisma.task.update({
@@ -65,12 +66,9 @@ export async function PUT(
       return validationError(error.message);
     }
     if (error?.code === "P2025") {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      return apiError(404, "NOT_FOUND", "Задача не найдена");
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", "Не удалось обновить задачу");
   }
 }
 
@@ -86,10 +84,10 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+  } catch (error: any) {
+    if (error?.code === "P2025") {
+      return apiError(404, "NOT_FOUND", "Задача не найдена");
+    }
+    return apiError(500, "INTERNAL_ERROR", "Не удалось удалить задачу");
   }
 }

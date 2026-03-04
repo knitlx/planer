@@ -3,6 +3,7 @@ import { IdeaStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
+  apiError,
   parseEnumValue,
   parseOptionalString,
   parseRequiredString,
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
       });
 
       if (!project) {
-        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+        return apiError(404, "NOT_FOUND", "Проект не найден");
       }
     }
 
@@ -66,9 +67,6 @@ export async function POST(request: Request) {
     if (error instanceof ValidationError) {
       return validationError(error.message);
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", "Не удалось создать идею");
   }
 }

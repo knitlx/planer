@@ -7,11 +7,23 @@ export class ValidationError extends Error {
   }
 }
 
-export function validationError(message: string) {
-  return NextResponse.json({ error: message }, { status: 400 });
+export type ApiErrorCode =
+  | "VALIDATION_ERROR"
+  | "NOT_FOUND"
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "CONFLICT"
+  | "INTERNAL_ERROR";
+
+export function apiError(status: number, code: ApiErrorCode, message: string) {
+  return NextResponse.json({ error: { code, message } }, { status });
 }
 
-export function assertRecord(value: unknown, message = "Invalid request body"): Record<string, unknown> {
+export function validationError(message: string) {
+  return apiError(400, "VALIDATION_ERROR", message);
+}
+
+export function assertRecord(value: unknown, message = "Некорректное тело запроса"): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new ValidationError(message);
   }

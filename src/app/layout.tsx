@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { QuantumSidebar } from "@/components/QuantumSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { getSiteUrl } from "@/lib/site-url";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin", "latin-ext"],
@@ -17,9 +18,32 @@ const jetBrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
+const description = "Персональная система продуктивности: проекты, задачи, фокус и идеи.";
+
 export const metadata: Metadata = {
-  title: "Focus Flow",
-  description: "Персональная система продуктивности",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: "Focus Flow",
+    template: "%s — Focus Flow",
+  },
+  description,
+  applicationName: "Focus Flow",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Focus Flow",
+    title: "Focus Flow",
+    description,
+    url: "/",
+    locale: "ru_RU",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Focus Flow",
+    description,
+  },
 };
 
 export default function RootLayout({

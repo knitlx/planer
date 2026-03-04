@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
+  apiError,
   parseOptionalEnumValue,
   parseOptionalNonNegativeInt,
   parseOptionalString,
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     });
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return apiError(404, "NOT_FOUND", "Проект не найден");
     }
 
     const task = await prisma.task.create({
@@ -49,9 +50,6 @@ export async function POST(request: Request) {
     if (error instanceof ValidationError) {
       return validationError(error.message);
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", "Не удалось создать задачу");
   }
 }

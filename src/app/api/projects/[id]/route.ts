@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
+  apiError,
   parseOptionalEnumValue,
   parseOptionalInt,
   parseOptionalString,
@@ -34,7 +35,7 @@ export async function GET(
     include: { tasks: { orderBy: { order: "asc" } } },
   });
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return apiError(404, "NOT_FOUND", "Проект не найден");
   }
   return NextResponse.json(project);
 }
@@ -69,7 +70,7 @@ export async function PUT(
       deadline === undefined &&
       status === undefined
     ) {
-      return validationError("At least one field is required");
+      return validationError("Нужно передать хотя бы одно поле для обновления");
     }
 
     const project = await prisma.project.update({
@@ -91,12 +92,9 @@ export async function PUT(
       return validationError(error.message);
     }
     if (error?.code === "P2025") {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return apiError(404, "NOT_FOUND", "Проект не найден");
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", "Не удалось обновить проект");
   }
 }
 
@@ -112,16 +110,11 @@ export async function DELETE(
   });
 
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return apiError(404, "NOT_FOUND", "Проект не найден");
   }
 
   if (project._count.tasks > 0) {
-    return NextResponse.json(
-      {
-        error: "Нельзя удалить проект, пока в нем есть задачи",
-      },
-      { status: 400 },
-    );
+    return apiError(409, "CONFLICT", "Нельзя удалить проект, пока в нем есть задачи");
   }
 
   await prisma.project.delete({ where: { id } });

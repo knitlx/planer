@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
+  apiError,
   parseEnumValue,
   parseOptionalInt,
   parseOptionalString,
@@ -38,22 +39,16 @@ export async function PUT(
     if (error instanceof ValidationError) {
       return validationError(error.message);
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Invalid request body" },
-      { status: 400 },
-    );
+    return apiError(400, "VALIDATION_ERROR", "Некорректное тело запроса");
   }
 
   const idea = await prisma.idea.findUnique({ where: { id } });
   if (!idea) {
-    return NextResponse.json({ error: "Idea not found" }, { status: 404 });
+    return apiError(404, "NOT_FOUND", "Идея не найдена");
   }
 
   if (idea.status !== "INBOX") {
-    return NextResponse.json(
-      { error: "Idea already processed" },
-      { status: 400 },
-    );
+    return apiError(409, "CONFLICT", "Идея уже обработана");
   }
 
   if (action === "archive") {
@@ -69,8 +64,8 @@ export async function PUT(
   }
 
   if (action === "convert_to_task") {
-    if (!title) return validationError("title is required");
-    if (!targetProjectId) return validationError("targetProjectId is required");
+    if (!title) return validationError("Поле title обязательно");
+    if (!targetProjectId) return validationError("Поле targetProjectId обязательно");
 
     const project = await prisma.project.findUnique({
       where: { id: targetProjectId },
@@ -78,7 +73,7 @@ export async function PUT(
     });
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return apiError(404, "NOT_FOUND", "Проект не найден");
     }
 
     const task = await prisma.$transaction(async (tx) => {
@@ -105,7 +100,7 @@ export async function PUT(
     return NextResponse.json(task);
   }
 
-  if (!projectName) return validationError("projectName is required");
+  if (!projectName) return validationError("Поле projectName обязательно");
   const projectWeight = weight ?? 5;
 
   const result = await prisma.$transaction(async (tx) => {

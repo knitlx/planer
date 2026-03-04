@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
+  apiError,
   parseOptionalEnumValue,
   parseOptionalInt,
   parseOptionalString,
@@ -51,13 +52,7 @@ export async function GET() {
     return NextResponse.json(enrichedProjects);
   } catch (error: any) {
     console.error("Error fetching projects:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to fetch projects",
-        details: error.message,
-      },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", "Не удалось загрузить проекты");
   }
 }
 
@@ -86,12 +81,6 @@ export async function POST(request: Request) {
       return validationError(error.message);
     }
     console.error("Error creating project:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to create project",
-        details: error.message,
-      },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", "Не удалось создать проект");
   }
 }
