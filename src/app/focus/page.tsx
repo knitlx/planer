@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useRouter } from "next/navigation";
-import { Flame, ArrowRight } from "lucide-react";
+import { Flame, ArrowRight, Target } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function FocusPage() {
@@ -16,6 +16,13 @@ export default function FocusPage() {
 
   const handleEnterFocus = (projectId: string) => {
     router.push(`/focus/${projectId}`);
+  };
+
+  const statusLabel = (status: string) => {
+    if (status === "ACTIVE") return "В работе";
+    if (status === "SNOOZED") return "На паузе";
+    if (status === "FINAL_STRETCH") return "Финальный рывок";
+    return "Инкубатор";
   };
 
   if (isLoading) {
@@ -70,16 +77,14 @@ export default function FocusPage() {
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-lg bg-qf-gradient-subtle border border-qf-border-secondary flex items-center justify-center">
-                          <span className="text-lg font-bold text-accent">
-                            {project.focusScore ?? 0}
-                          </span>
+                          <Target className="w-5 h-5 text-accent" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-text-primary">
                             {project.name}
                           </h3>
                           <p className="text-sm text-text-muted">
-                            {project.progress}% прогресс
+                            Прогресс: {project.progress}% · Статус: {statusLabel(project.status)}
                           </p>
                         </div>
                       </div>

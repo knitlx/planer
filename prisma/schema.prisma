@@ -12,6 +12,8 @@ model Project {
   userId          String?
   user            User?         @relation(fields: [userId], references: [id])
   name            String
+  description     String?
+  deadline        DateTime?
   weight          Int           @default(5)
   friction        Int           @default(5)
   progress        Float         @default(0)

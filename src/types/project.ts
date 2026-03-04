@@ -28,7 +28,7 @@ export interface Project {
   lastActive: string | Date;
   lastSessionNote?: string | null;
   description?: string;
-  deadline?: string;
+  deadline?: string | Date | null;
   tasks?: Task[];
   createdAt?: string | Date;
   updatedAt?: string | Date;

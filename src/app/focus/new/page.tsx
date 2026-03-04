@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { quantumGradientClasses } from "@/lib/quantum-theme";
+import type { ProjectStatus } from "@/types/project";
 
 type CreateProjectResponse = {
   id: string;
@@ -13,7 +14,10 @@ type CreateProjectResponse = {
 export default function NewFocusProjectPage() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [weight, setWeight] = useState(5);
+  const [deadline, setDeadline] = useState("");
+  const [status, setStatus] = useState<ProjectStatus>("ACTIVE");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -26,7 +30,13 @@ export default function NewFocusProjectPage() {
       const response = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: projectName, weight }),
+        body: JSON.stringify({
+          name: projectName,
+          description: description.trim() || null,
+          weight,
+          deadline: deadline ? new Date(`${deadline}T00:00:00.000Z`).toISOString() : null,
+          status,
+        }),
       });
 
       if (!response.ok) {
@@ -84,6 +94,50 @@ export default function NewFocusProjectPage() {
               className="w-full accent-purple-500"
               disabled={isSubmitting}
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+              Описание
+            </label>
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Краткое описание проекта (опционально)"
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-none"
+              rows={4}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+              Дедлайн
+            </label>
+            <Input
+              type="date"
+              value={deadline}
+              onChange={(event) => setDeadline(event.target.value)}
+              className="bg-qf-bg-secondary border-qf-border-primary"
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+              Статус проекта
+            </label>
+            <select
+              value={status}
+              onChange={(event) => setStatus(event.target.value as ProjectStatus)}
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent"
+              disabled={isSubmitting}
+            >
+              <option value="ACTIVE">В работе</option>
+              <option value="SNOOZED">На паузе</option>
+              <option value="FINAL_STRETCH">Финальный рывок</option>
+              <option value="INCUBATOR">Инкубатор</option>
+            </select>
           </div>
 
           <div className="flex flex-wrap gap-3 pt-2">

@@ -1,4 +1,4 @@
-import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
+import { test, expect, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 
 test.describe("Task board editing and moving", () => {
   test("allows renaming a task and performing explicit status transitions", async ({
@@ -17,6 +17,9 @@ test.describe("Task board editing and moving", () => {
       currentPage
         .getByText(currentTitle, { exact: true })
         .locator("xpath=ancestor::div[contains(@class,'p-3')][1]");
+    const setTaskStatus = async (taskCard: Locator, status: "TODO" | "IN_PROGRESS" | "DONE" | "CANCELLED") => {
+      await taskCard.getByLabel("Статус задачи").selectOption(status);
+    };
 
     const taskStatusFromApi = async (api: APIRequestContext, currentProjectId: string, currentTaskId: string) => {
       const response = await api.get(`/api/tasks?projectId=${currentProjectId}`);
@@ -73,7 +76,7 @@ test.describe("Task board editing and moving", () => {
         .toBe(0);
 
       const renamedCard = taskCardByTitle(renamedTitle, page);
-      await renamedCard.getByRole("button", { name: "В процессе" }).click();
+      await setTaskStatus(renamedCard, "IN_PROGRESS");
 
       await expect
         .poll(async () => taskStatusFromApi(request, projectId!, taskId!))
@@ -83,7 +86,7 @@ test.describe("Task board editing and moving", () => {
         .toBe(0);
 
       const inProgressCard = taskCardByTitle(renamedTitle, page);
-      await inProgressCard.getByRole("button", { name: "Done" }).click();
+      await setTaskStatus(inProgressCard, "DONE");
 
       await expect
         .poll(async () => taskStatusFromApi(request, projectId!, taskId!))
@@ -93,9 +96,7 @@ test.describe("Task board editing and moving", () => {
         .toBe(100);
 
       const doneCard = taskCardByTitle(renamedTitle, page);
-      const doneToInProgress = doneCard.getByRole("button", { name: "В процессе" });
-      await expect(doneToInProgress).toBeVisible();
-      await doneToInProgress.click();
+      await setTaskStatus(doneCard, "IN_PROGRESS");
 
       await expect
         .poll(async () => taskStatusFromApi(request, projectId!, taskId!))
@@ -105,9 +106,7 @@ test.describe("Task board editing and moving", () => {
         .toBe(0);
 
       const inProgressToTodoCard = taskCardByTitle(renamedTitle, page);
-      const toTodoButton = inProgressToTodoCard.getByRole("button", { name: "В TODO" });
-      await expect(toTodoButton).toBeVisible();
-      await toTodoButton.click();
+      await setTaskStatus(inProgressToTodoCard, "TODO");
 
       await expect
         .poll(async () => taskStatusFromApi(request, projectId!, taskId!))
@@ -115,6 +114,22 @@ test.describe("Task board editing and moving", () => {
       await expect
         .poll(async () => projectProgressFromApi(request, projectId!))
         .toBe(0);
+
+      const finalCard = taskCardByTitle(renamedTitle, page);
+      const deleteButton = finalCard.getByRole("button", { name: "Удалить" });
+      await expect(deleteButton).toBeVisible();
+      await deleteButton.click();
+
+      await expect(page.getByText(renamedTitle, { exact: true })).toHaveCount(0);
+      await expect
+        .poll(async () => {
+          const response = await request.get(`/api/tasks?projectId=${projectId!}`);
+          expect(response.ok()).toBeTruthy();
+          const items = (await response.json()) as Array<{ id: string }>;
+          return items.some((item) => item.id === taskId!);
+        })
+        .toBe(false);
+      taskId = null;
     } finally {
       if (taskId) {
         await request.delete(`/api/tasks/${taskId}`).catch(() => null);

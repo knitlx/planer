@@ -22,11 +22,20 @@ export async function PUT(
     const body = await request.json();
     const payload = assertRecord(body);
     const title = parseOptionalString(payload.title, "title", 500);
+    const contextSummary = parseOptionalString(payload.contextSummary, "contextSummary", 4000);
+    const timerLog = parseOptionalString(payload.timerLog, "timerLog", 64);
     const type = parseOptionalEnumValue(payload.type, "type", TASK_TYPES);
     const status = parseOptionalEnumValue(payload.status, "status", TASK_STATUSES);
     const order = parseOptionalNonNegativeInt(payload.order, "order");
 
-    if (title === undefined && type === undefined && status === undefined && order === undefined) {
+    if (
+      title === undefined &&
+      contextSummary === undefined &&
+      timerLog === undefined &&
+      type === undefined &&
+      status === undefined &&
+      order === undefined
+    ) {
       return validationError("At least one field is required");
     }
 
@@ -34,6 +43,8 @@ export async function PUT(
       where: { id },
       data: {
         title,
+        contextSummary: contextSummary === undefined ? undefined : contextSummary || null,
+        timerLog: timerLog === undefined ? undefined : timerLog || null,
         type,
         status,
         order,

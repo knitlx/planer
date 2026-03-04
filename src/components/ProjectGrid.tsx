@@ -53,6 +53,14 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
       {projects.map((project) => {
         const status = getStatusByProgress(project.progress);
         const statusColor = getStatusColor(status);
+        const statusLabel =
+          project.status === "ACTIVE"
+            ? "В работе"
+            : project.status === "SNOOZED"
+              ? "На паузе"
+              : project.status === "FINAL_STRETCH"
+                ? "Финальный рывок"
+                : "Инкубатор";
         const priorityColor = getPriorityColor(project.weight);
         const completedTasks = getCompletedTasksCount(project.tasks);
         const totalTasks = project.tasks?.length || 0;
@@ -80,7 +88,7 @@ export function ProjectGrid({ projects, onSelectProject }: ProjectGridProps) {
                       color: statusColor.text
                     }}
                   >
-                    {status === "completed" ? "Завершен" : "В работе"}
+                    {status === "completed" ? "Завершен" : statusLabel}
                   </span>
                 </div>
               </div>

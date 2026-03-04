@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Folder, Trash2 } from "lucide-react";
+import { Folder, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ProjectGrid } from "@/components/ProjectGrid";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -89,6 +89,13 @@ export default function ProjectsPage() {
             </p>
           </div>
         </div>
+        <button
+          onClick={() => router.push("/focus/new")}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-qf-gradient-primary text-white text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          Создать проект
+        </button>
       </header>
 
       <ProjectGrid
