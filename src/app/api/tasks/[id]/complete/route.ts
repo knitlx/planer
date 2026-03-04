@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { TaskService } from "@/services/TaskService";
 import {
   assertRecord,
+  apiError,
   parseOptionalString,
   ValidationError,
   validationError,
@@ -28,9 +29,6 @@ export async function PUT(
     if (error instanceof ValidationError) {
       return validationError(error.message);
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", error instanceof Error ? error.message : "Не удалось завершить задачу");
   }
 }

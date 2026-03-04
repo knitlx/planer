@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { apiError } from "@/lib/api-validation";
 
 export async function PUT(
   request: Request,
@@ -14,7 +15,7 @@ export async function PUT(
     });
 
     if (!task) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      return apiError(404, "NOT_FOUND", "Задача не найдена");
     }
 
     await prisma.$transaction([
@@ -30,9 +31,6 @@ export async function PUT(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", "Не удалось обновить next-step");
   }
 }

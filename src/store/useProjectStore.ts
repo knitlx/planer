@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { ProjectStatus, ProjectWithMeta } from "@/types/project";
+import { getApiErrorMessage } from "@/lib/api-client";
 
 interface ProjectState {
   projects: ProjectWithMeta[];
@@ -62,8 +63,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       body: JSON.stringify({ status, lastSessionNote }),
     });
     if (!response.ok) {
-      const error = (await response.json()) as { message?: string };
-      throw new Error(error.message || "Failed to update status");
+      const payload = (await response.json()) as unknown;
+      throw new Error(getApiErrorMessage(payload) || "Не удалось обновить статус");
     }
     await get().fetchProjects();
   },

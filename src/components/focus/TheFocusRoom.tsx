@@ -77,7 +77,7 @@ export function TheFocusRoom() {
           <h1 className="text-4xl font-bold text-white mb-4">{project.name}</h1>
           {project.lastSessionNote && (
             <div className="bg-qf-bg-glass backdrop-blur-xl rounded-xl p-4 text-qf-text-secondary italic border-l-4 border-cyan-400 border border-qf-border-secondary">
-              "Прошлая заметка: {project.lastSessionNote}"
+              «Прошлая заметка: {project.lastSessionNote}»
             </div>
           )}
         </motion.div>

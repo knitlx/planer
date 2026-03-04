@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { TaskService } from "@/services/TaskService";
+import { apiError } from "@/lib/api-validation";
 
 export async function POST(
   request: Request,
@@ -11,9 +12,6 @@ export async function POST(
     const tasks = await TaskService.simplifyTask(id);
     return NextResponse.json(tasks);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    );
+    return apiError(500, "INTERNAL_ERROR", error instanceof Error ? error.message : "Не удалось упростить задачу");
   }
 }

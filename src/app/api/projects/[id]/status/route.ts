@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
+  apiError,
   parseEnumValue,
   parseOptionalString,
   ValidationError,
@@ -30,15 +31,12 @@ export async function PUT(
     if (error instanceof ValidationError) {
       return validationError(error.message);
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Invalid request body" },
-      { status: 400 },
-    );
+    return apiError(400, "VALIDATION_ERROR", "Некорректное тело запроса");
   }
 
   const project = await prisma.project.findUnique({ where: { id } });
   if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return apiError(404, "NOT_FOUND", "Проект не найден");
   }
 
   if (status === "ACTIVE" && project.status !== "ACTIVE") {
@@ -52,8 +50,7 @@ export async function PUT(
       });
       return NextResponse.json(
         {
-          error: "WIP_LIMIT_EXCEEDED",
-          message: `Cannot activate more than ${WIP_LIMIT} projects`,
+          error: { code: "WIP_LIMIT_EXCEEDED", message: `Нельзя активировать больше ${WIP_LIMIT} проектов` },
           activeProjects,
         },
         { status: 409 },
@@ -64,8 +61,10 @@ export async function PUT(
   if (project.status === "ACTIVE" && status !== "ACTIVE" && !lastSessionNote) {
     return NextResponse.json(
       {
-        error: "HOOK_REQUIRED",
-        message: "Please provide a session note before stopping focus",
+        error: {
+          code: "HOOK_REQUIRED",
+          message: "Перед остановкой фокуса добавьте заметку о результатах сессии",
+        },
       },
       { status: 400 },
     );

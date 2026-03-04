@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useFocusStore } from "@/store/useFocusStore";
 import { Button } from "@/components/ui/button";
 import { formatDurationHms, parseDurationMs } from "@/lib/utils";
+import { getApiErrorMessage } from "@/lib/api-client";
 
 const TIMER_STEP_SECOND_MS = 10 * 1000;
 const TIMER_STEP_MINUTE_MS = 60 * 1000;
@@ -206,10 +207,8 @@ export function TheFocusRoom() {
         body: JSON.stringify({ status: "SNOOZED", lastSessionNote: note }),
       });
       if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as
-          | { message?: string; error?: string }
-          | null;
-        throw new Error(payload?.message || payload?.error || "Не удалось обновить статус проекта");
+        const payload = (await response.json().catch(() => null)) as unknown;
+        throw new Error(getApiErrorMessage(payload) || "Не удалось обновить статус проекта");
       }
       await leaveFocusRoom(currentProjectId, false);
     } catch (error) {

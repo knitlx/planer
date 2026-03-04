@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { apiError } from "@/lib/api-validation";
 
 interface TelegramMessage {
   message: {
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
   const secretToken = request.headers.get("x-telegram-bot-api-secret-token");
   if (secretToken !== process.env.TELEGRAM_WEBHOOK_SECRET) {
     console.error("Invalid webhook secret");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiError(401, "UNAUTHORIZED", "Не авторизовано");
   }
 
   const body: TelegramMessage = await request.json();
