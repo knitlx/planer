@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useFocusStore } from "@/store/useFocusStore";
+import { AppModal } from "@/components/AppModal";
 import { Button } from "@/components/ui/button";
 import { formatDurationHms, parseDurationMs } from "@/lib/utils";
 import { getApiErrorMessage } from "@/lib/api-client";
@@ -44,6 +46,8 @@ export function TheFocusRoom() {
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [manualHmsInput, setManualHmsInput] = useState("00:00:00");
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [leavePromptOpen, setLeavePromptOpen] = useState(false);
+  const [leavePromptMessage, setLeavePromptMessage] = useState("");
   const displayElapsedMs = Math.max(0, elapsedMs);
 
   const persistElapsedTimeToTask = async () => {
@@ -167,7 +171,7 @@ export function TheFocusRoom() {
   const applyManualTimer = () => {
     const parsed = parseHmsInputToMs(manualHmsInput);
     if (parsed === null) {
-      alert("Введите время в формате HH:MM:SS");
+      toast.error("Введите время в формате HH:MM:SS");
       return;
     }
     setElapsedMs(parsed);
@@ -190,7 +194,7 @@ export function TheFocusRoom() {
   const handleStop = async () => {
     const note = sessionNote.trim();
     if (!note) {
-      alert("Добавьте заметку сессии перед остановкой.");
+      toast.error("Добавьте заметку сессии перед остановкой.");
       return;
     }
 
@@ -214,12 +218,8 @@ export function TheFocusRoom() {
     } catch (error) {
       console.error("Error stopping focus:", error);
       const message = error instanceof Error ? error.message : "Неизвестная ошибка";
-      const shouldLeave = window.confirm(
-        `${message}. Выйти из Focus Room без сохранения статуса?`,
-      );
-      if (shouldLeave) {
-        await leaveFocusRoom(currentProjectId, false);
-      }
+      setLeavePromptMessage(message);
+      setLeavePromptOpen(true);
     }
   };
 
@@ -395,6 +395,33 @@ export function TheFocusRoom() {
           </Button>
         </div>
       </div>
+      <AppModal
+        open={leavePromptOpen}
+        title="Ошибка остановки сессии"
+        description={`${leavePromptMessage}. Выйти из Focus Room без сохранения статуса?`}
+        onClose={() => setLeavePromptOpen(false)}
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setLeavePromptOpen(false)}
+              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+            >
+              Остаться
+            </button>
+            <button
+              onClick={() => {
+                setLeavePromptOpen(false);
+                void leaveFocusRoom(currentProjectId, false);
+              }}
+              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity"
+            >
+              Выйти без сохранения
+            </button>
+          </div>
+        }
+      >
+        {null}
+      </AppModal>
     </motion.div>
   );
 }
