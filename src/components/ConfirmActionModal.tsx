@@ -1,6 +1,7 @@
 "use client";
 
 import { AppModal } from "@/components/AppModal";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmActionModalProps {
   open: boolean;
@@ -33,20 +34,22 @@ export function ConfirmActionModal({
       disableClose={isLoading}
       footer={
         <div className="grid grid-cols-2 gap-3">
-          <button
+          <Button
             onClick={onCancel}
             disabled={isLoading}
-            className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors disabled:opacity-60"
+            variant="secondary"
+            className="w-full"
           >
             {cancelText}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-4 py-2 rounded-lg bg-red-500/90 text-white hover:bg-red-500 transition-colors disabled:opacity-60"
+            variant="destructive"
+            className="w-full"
           >
             {isLoading ? "Выполняю..." : confirmText}
-          </button>
+          </Button>
         </div>
       }
     >

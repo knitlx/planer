@@ -70,6 +70,7 @@ export async function POST(request: Request) {
       "ACTIVE",
       "SNOOZED",
       "FINAL_STRETCH",
+      "DONE",
     ] as const);
 
     const project = await prisma.project.create({

@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Link from "next/link";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useFocusStore } from "@/store/useFocusStore";
-import { QuantumWidgets } from "@/components/QuantumWidgets";
 import { ProjectGrid } from "@/components/ProjectGrid";
 import { QuickCollect } from "@/components/QuickCollect";
 import { TheFocusRoom } from "@/components/TheFocusRoom";
 import { getCompletedTasksCount } from "@/lib/project-utils";
-import { quantumGradientClasses } from "@/lib/quantum-theme";
-import { Plus, Zap, Target, Brain, Activity } from "lucide-react";
+import { Plus, Zap, Target, Brain } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import type { TaskStatus } from "@/types/project";
 import { AppModal } from "@/components/AppModal";
 
@@ -31,12 +31,17 @@ export default function Dashboard() {
     fetchProjects();
   }, [fetchProjects]);
 
+  const visibleProjects = useMemo(
+    () => projects.filter((project) => project.status !== "DONE"),
+    [projects],
+  );
+
   const handleSelectProject = (projectId: string) => {
     router.push(`/focus/${projectId}`);
   };
 
   const projectStats = useMemo(() => {
-    return projects.reduce(
+    return visibleProjects.reduce(
       (acc, project) => {
         if (project.progress < 100) acc.active += 1;
         if (project.progress >= 100) acc.completed += 1;
@@ -46,7 +51,7 @@ export default function Dashboard() {
         else if (project.weight >= 5) acc.mediumPriority += 1;
         else acc.lowPriority += 1;
 
-        acc.totalTasks += project.tasks?.length || 0;
+        acc.totalTasks += (project.tasks ?? []).filter((task) => task.status !== "DONE").length;
         acc.completedTasks += getCompletedTasksCount(project.tasks);
         acc.progressSum += project.progress;
 
@@ -64,16 +69,16 @@ export default function Dashboard() {
         progressSum: 0,
       },
     );
-  }, [projects]);
+  }, [visibleProjects]);
 
   const averageProgress =
-    projects.length > 0
-      ? Math.round(projectStats.progressSum / projects.length)
+    visibleProjects.length > 0
+      ? Math.round(projectStats.progressSum / visibleProjects.length)
       : 0;
 
   const availableFocusTasks = useMemo(() => {
     const activeStatuses: TaskStatus[] = ["TODO", "IN_PROGRESS"];
-    return projects.flatMap((project) =>
+    return visibleProjects.flatMap((project) =>
       (project.tasks ?? [])
         .filter((task) => activeStatuses.includes(task.status))
         .map((task) => ({
@@ -84,14 +89,14 @@ export default function Dashboard() {
           status: task.status,
         })),
     );
-  }, [projects]);
+  }, [visibleProjects]);
 
   const handleOpenAddTask = () => {
-    if (projects.length === 0) {
+    if (visibleProjects.length === 0) {
       router.push("/focus/new");
       return;
     }
-    setSelectedProjectId(projects[0].id);
+    setSelectedProjectId(visibleProjects[0].id);
     setShowAddTaskModal(true);
   };
 
@@ -127,7 +132,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleQuickFocus = () => {
+  const openQuickFocusModal = useCallback(() => {
     if (availableFocusTasks.length === 0) {
       toast.error("Нет активных задач для фокуса");
       return;
@@ -135,7 +140,24 @@ export default function Dashboard() {
 
     setSelectedFocusTaskId(availableFocusTasks[0].id);
     setShowQuickFocusModal(true);
+  }, [availableFocusTasks]);
+
+  const handleQuickFocus = () => {
+    openQuickFocusModal();
   };
+
+  useEffect(() => {
+    const handler = () => openQuickFocusModal();
+    window.addEventListener("quick-focus:open", handler);
+    return () => window.removeEventListener("quick-focus:open", handler);
+  }, [openQuickFocusModal]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("quickFocus") !== "1") return;
+    openQuickFocusModal();
+    window.history.replaceState(null, "", "/");
+  }, [openQuickFocusModal]);
 
   const handleStartQuickFocus = () => {
     const selectedTask = availableFocusTasks.find(
@@ -220,51 +242,49 @@ export default function Dashboard() {
     <>
       {currentProjectId && <TheFocusRoom />}
 
-      <div className="p-6 md:p-10 animate-in fade-in duration-300 text-white">
-        <header className="mb-10">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="mx-auto w-full max-w-[1600px] p-6 md:p-10 xl:p-12 animate-in fade-in duration-300 text-qf-text-primary">
+        <header className="mb-12">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div className="space-y-3">
-              <h1 className="text-5xl font-bold">Обзор дня</h1>
-              <p className="text-base md:text-lg text-qf-text-secondary max-w-2xl">
-                Главное по проектам и задачам в одном месте.
+              <h1 className="text-2xl md:text-3xl xl:text-4xl font-medium tracking-tight">Обзор дня</h1>
+              <p className="text-base text-qf-text-secondary font-medium">
+                Ваш прогресс на сегодня
               </p>
             </div>
-            <div className="flex flex-col gap-3 self-start lg:items-end shrink-0">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/35 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-300">
-                <Activity className="h-3.5 w-3.5" />
-                Система активна
+            <div className="flex flex-wrap gap-3 self-start xl:self-auto shrink-0">
+              <div className="stat-box px-5 py-3 rounded-2xl text-center min-w-[96px] shadow-xl">
+                <div className="stat-value text-xl text-qf-status-medium-text">{projectStats.active}</div>
+                <div className="text-[9px] font-bold text-qf-text-muted tracking-tighter mt-1 font-[var(--font-unbounded)]">Проекты</div>
+              </div>
+              <div className="stat-box px-5 py-3 rounded-2xl text-center min-w-[96px] shadow-xl">
+                <div className="stat-value text-xl text-qf-status-low-text">{projectStats.totalTasks}</div>
+                <div className="text-[9px] font-bold text-qf-text-muted tracking-tighter mt-1 font-[var(--font-unbounded)]">Задачи</div>
+              </div>
+              <div className="stat-box px-5 py-3 rounded-2xl text-center min-w-[96px] shadow-xl">
+                <div className="stat-value text-xl text-qf-status-high-text">{averageProgress}%</div>
+                <div className="text-[9px] font-bold text-qf-text-muted tracking-tighter mt-1 font-[var(--font-unbounded)]">Прогресс</div>
               </div>
             </div>
           </div>
         </header>
 
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-6 tracking-wide">Обзор</h2>
-          <QuantumWidgets />
-        </section>
-
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 tracking-wide">Действия</h2>
+          <h3 className="mb-5 text-[10px] tracking-wide text-qf-text-muted font-medium font-[var(--font-unbounded)] opacity-80">
+            Горячие действия
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {quickActions.map((action) => (
               <button
                 key={action.id}
                 onClick={action.onClick}
-                className="qf-shell-card rounded-2xl p-6 text-left transition-all duration-300 hover:translate-y-[-3px] group"
+                className="card p-5 rounded-2xl flex items-center text-left cursor-pointer group"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 rounded-xl border border-qf-border-secondary bg-qf-gradient-primary">
-                    <action.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-white tracking-wide">{action.title}</h3>
-                    <p className="text-sm text-qf-text-secondary">{action.description}</p>
-                  </div>
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mr-4 text-xl group-hover:bg-qf-status-high-text group-hover:text-[#0A0908] transition-all">
+                  <action.icon className="w-5 h-5" />
                 </div>
-                <div className="flex justify-end">
-                  <div className="w-8 h-8 rounded-full border border-qf-border-primary bg-qf-bg-secondary/60 flex items-center justify-center group-hover:border-qf-border-accent transition-colors">
-                    <Plus className="w-4 h-4 text-qf-text-secondary group-hover:text-white" />
-                  </div>
+                <div className="leading-tight">
+                  <div className="text-[14px] font-bold">{action.title}</div>
+                  <div className="text-[11px] text-qf-text-muted font-semibold mt-0.5">{action.description}</div>
                 </div>
               </button>
             ))}
@@ -273,74 +293,18 @@ export default function Dashboard() {
 
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold tracking-wide">ПРОЕКТЫ</h2>
-            <div className="text-sm text-qf-text-muted">
-              {projects.length} {projects.length === 1 ? "проект" : projects.length < 5 ? "проекта" : "проектов"}
-            </div>
+            <h3 className="text-[10px] tracking-wide text-qf-text-muted font-medium font-[var(--font-unbounded)]">
+              Активные проекты
+            </h3>
+            <Link
+              href="/projects"
+              className="text-xs font-medium text-qf-text-accent hover:underline font-[var(--font-unbounded)]"
+            >
+              Все →
+            </Link>
           </div>
-          <ProjectGrid projects={projects} onSelectProject={handleSelectProject} />
+          <ProjectGrid projects={visibleProjects} onSelectProject={handleSelectProject} />
         </section>
-
-        {projects.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 tracking-wide">СТАТИСТИКА</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="qf-shell-card rounded-2xl p-6 border border-qf-border-glass">
-                <h3 className="font-bold mb-4">Распределение по статусам</h3>
-                <div className="space-y-4">
-                  {[
-                    { label: "В работе", value: projectStats.active, color: "bg-cyan-400" },
-                    { label: "Завершены", value: projectStats.completed, color: "bg-cyan-300" },
-                    { label: "Не начаты", value: projectStats.notStarted, color: "bg-cyan-200" },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                        <span className="text-sm">{item.label}</span>
-                      </div>
-                      <span className="font-bold">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="qf-shell-card rounded-2xl p-6 border border-qf-border-glass">
-                <h3 className="font-bold mb-4">Прогресс по приоритетам</h3>
-                <div className="space-y-4">
-                  {[
-                    { label: "Высокий", value: projectStats.highPriority, color: "bg-cyan-400" },
-                    { label: "Средний", value: projectStats.mediumPriority, color: "bg-cyan-300" },
-                    { label: "Низкий", value: projectStats.lowPriority, color: "bg-cyan-200" },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                        <span className="text-sm">{item.label}</span>
-                      </div>
-                      <span className="font-bold">{item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="qf-shell-card rounded-2xl p-6 border border-qf-border-glass">
-                <h3 className="font-bold mb-4">Общая статистика</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Всего задач</span>
-                    <span className="font-bold">{projectStats.totalTasks}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Выполнено задач</span>
-                    <span className="font-bold">{projectStats.completedTasks}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Средний прогресс</span>
-                    <span className="font-bold">{averageProgress}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
 
         <section id="quick-collect" className="mb-12">
           <QuickCollect />
@@ -358,35 +322,36 @@ export default function Dashboard() {
         disableClose={isCreatingTask}
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <button
+            <Button
               onClick={() => {
                 setShowAddTaskModal(false);
                 setNewTaskTitle("");
               }}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
+              className="w-full"
               disabled={isCreatingTask}
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleCreateTask}
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full"
               disabled={isCreatingTask || !newTaskTitle.trim() || !selectedProjectId}
             >
               {isCreatingTask ? "Создание..." : "Создать"}
-            </button>
+            </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Проект</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Проект</label>
             <select
               value={selectedProjectId}
               onChange={(event) => setSelectedProjectId(event.target.value)}
-              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent"
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
             >
-              {projects.map((project) => (
+              {visibleProjects.map((project) => (
                 <option key={project.id} value={project.id}>
                   {project.name}
                 </option>
@@ -394,7 +359,7 @@ export default function Dashboard() {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Название задачи</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Название задачи</label>
             <Input
               value={newTaskTitle}
               onChange={(event) => setNewTaskTitle(event.target.value)}
@@ -413,19 +378,20 @@ export default function Dashboard() {
         maxWidthClassName="max-w-2xl"
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <button
+            <Button
               onClick={() => setShowQuickFocusModal(false)}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
+              className="w-full"
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleStartQuickFocus}
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full"
               disabled={!selectedFocusTaskId}
             >
               Начать фокус
-            </button>
+            </Button>
           </div>
         }
       >
@@ -440,7 +406,7 @@ export default function Dashboard() {
                   : "border-qf-border-secondary bg-qf-bg-secondary/50 hover:border-qf-border-primary"
               }`}
             >
-              <p className="font-medium text-white">{task.title}</p>
+              <p className="font-medium text-qf-text-primary">{task.title}</p>
               <p className="text-sm text-qf-text-secondary mt-1">{task.projectName}</p>
             </button>
           ))}
@@ -449,4 +415,3 @@ export default function Dashboard() {
     </>
   );
 }
-

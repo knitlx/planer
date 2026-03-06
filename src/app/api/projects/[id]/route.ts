@@ -6,6 +6,7 @@ import {
   parseOptionalEnumValue,
   parseOptionalInt,
   parseOptionalString,
+  parseOptionalBoolean,
   ValidationError,
   validationError,
 } from "@/lib/api-validation";
@@ -59,7 +60,13 @@ export async function PUT(
       "ACTIVE",
       "SNOOZED",
       "FINAL_STRETCH",
+      "DONE",
     ] as const);
+    const type = parseOptionalEnumValue(payload.type, "type", [
+      "MANDATORY",
+      "NORMAL",
+    ] as const);
+    const todayCompleted = parseOptionalBoolean(payload.todayCompleted, "todayCompleted");
 
     if (
       name === undefined &&
@@ -68,7 +75,9 @@ export async function PUT(
       weight === undefined &&
       friction === undefined &&
       deadline === undefined &&
-      status === undefined
+      status === undefined &&
+      type === undefined &&
+      todayCompleted === undefined
     ) {
       return validationError("Нужно передать хотя бы одно поле для обновления");
     }
@@ -84,6 +93,9 @@ export async function PUT(
         friction,
         deadline,
         status,
+        type,
+        todayCompleted,
+        lastCompletedAt: todayCompleted === true ? new Date() : todayCompleted === false ? null : undefined,
       },
     });
     return NextResponse.json(project);

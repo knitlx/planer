@@ -40,6 +40,7 @@ interface TaskBoardProps {
   onRenameTask: (taskId: string, title: string, contextSummary: string) => Promise<void>;
   onMoveTask: (taskId: string, status: TaskStatus, order?: number) => Promise<void>;
   onDeleteTask: (taskId: string) => Promise<void>;
+  onUpdateTaskTimer: (taskId: string, ms: number) => Promise<void>;
 }
 
 export function TaskBoard({
@@ -56,12 +57,16 @@ export function TaskBoard({
   onRenameTask,
   onMoveTask,
   onDeleteTask,
+  onUpdateTaskTimer,
 }: TaskBoardProps) {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [editingNote, setEditingNote] = useState("");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isEditInteractive, setIsEditInteractive] = useState(true);
+  const [editingTimerTaskId, setEditingTimerTaskId] = useState<string | null>(null);
+  const [editingTimerHms, setEditingTimerHms] = useState("");
+  const [isSavingTimer, setIsSavingTimer] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
@@ -125,6 +130,51 @@ export function TaskBoard({
       cancelEditTask();
     } finally {
       setIsSavingEdit(false);
+    }
+  };
+
+  const parseHmsInputToMs = (value: string): number | null => {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const parts = trimmed.split(":");
+    if (parts.length !== 3) return null;
+    const [hRaw, mRaw, sRaw] = parts;
+    const h = Number(hRaw);
+    const m = Number(mRaw);
+    const s = Number(sRaw);
+    if (!Number.isFinite(h) || !Number.isFinite(m) || !Number.isFinite(s)) return null;
+    if (h < 0 || m < 0 || s < 0 || m > 59 || s > 59) return null;
+    return Math.floor((h * 3600 + m * 60 + s) * 1000);
+  };
+
+  const startEditTimer = (task: Task) => {
+    setEditingTimerTaskId(task.id);
+    setEditingTimerHms(formatDurationHms(parseDurationMs(task.timerLog)));
+  };
+
+  const cancelEditTimer = () => {
+    const taskId = editingTimerTaskId;
+    setEditingTimerTaskId(null);
+    setEditingTimerHms("");
+    setIsSavingTimer(false);
+    if (taskId) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`task-timer-edit-${taskId}`) as HTMLButtonElement | null;
+        el?.focus({ preventScroll: true });
+      });
+    }
+  };
+
+  const saveTimer = async () => {
+    if (!editingTimerTaskId) return;
+    const ms = parseHmsInputToMs(editingTimerHms);
+    if (ms === null) return;
+    try {
+      setIsSavingTimer(true);
+      await onUpdateTaskTimer(editingTimerTaskId, ms);
+      cancelEditTimer();
+    } finally {
+      setIsSavingTimer(false);
     }
   };
 
@@ -215,34 +265,34 @@ export function TaskBoard({
       status: TASK_STATUS.TODO as TaskStatus,
       title: "К выполнению",
       tasks: columns.todo,
-      accent: "bg-blue-500",
+      accent: "bg-[#ff5f33]",
     },
     {
       id: "in-progress",
       status: TASK_STATUS.IN_PROGRESS as TaskStatus,
       title: "В процессе",
       tasks: columns.inProgress,
-      accent: "bg-cyan-500",
+      accent: "bg-[#ffc300]",
     },
     {
       id: "done",
       status: TASK_STATUS.DONE as TaskStatus,
       title: "Готово",
       tasks: columns.done,
-      accent: "bg-purple-500",
+      accent: "bg-[#a2d149]",
     },
   ] as const;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6" style={{ overflowAnchor: "none" }}>
       <div className={`${quantumGlass.base} rounded-2xl border p-4 md:p-5`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Доска задач</h2>
           <button
             onClick={onToggleAddTask}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-qf-gradient-primary text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#FFC300] text-[#0A0908] text-base font-black border border-[#FFC300] hover:brightness-105 transition-all"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" strokeWidth={2.8} />
             Добавить задачу
           </button>
         </div>
@@ -255,20 +305,20 @@ export function TaskBoard({
                 if (event.key === "Enter" && !isCreatingTask) onAddTask();
               }}
               placeholder="Название задачи..."
-              className="flex-1 rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent"
+              className="flex-1 rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent"
               disabled={isCreatingTask}
             />
             <input
               value={newTaskNote}
               onChange={(event) => onNewTaskNoteChange(event.target.value)}
               placeholder="Заметка к задаче (опционально)..."
-              className="flex-1 rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent"
+              className="flex-1 rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent"
               disabled={isCreatingTask}
             />
             <button
               onClick={onAddTask}
               disabled={isCreatingTask || !newTaskTitle.trim()}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-sm text-qf-text-secondary hover:text-white hover:border-qf-border-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 rounded-lg border border-qf-border-primary text-sm text-qf-text-secondary hover:text-qf-text-primary hover:border-qf-border-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {isCreatingTask ? "Добавление..." : "Сохранить"}
             </button>
@@ -299,6 +349,7 @@ export function TaskBoard({
                     {column.tasks.map((task) => {
                       const completed = task.status === TASK_STATUS.DONE || task.status === TASK_STATUS.CANCELLED;
                       const isEditing = editingTaskId === task.id;
+                      const isTimerEditing = editingTimerTaskId === task.id;
                       return (
                         <TaskCard
                           key={task.id}
@@ -325,6 +376,13 @@ export function TaskBoard({
                           onFocus={() => onStartTask(task.id)}
                           onMove={(status) => onMoveTask(task.id, status)}
                           onDelete={() => onDeleteTask(task.id)}
+                          isTimerEditing={isTimerEditing}
+                          timerHms={editingTimerHms}
+                          onTimerInputChange={setEditingTimerHms}
+                          onTimerEditStart={() => startEditTimer(task)}
+                          onTimerEditCancel={cancelEditTimer}
+                          onTimerSave={() => void saveTimer()}
+                          isSavingTimer={isSavingTimer}
                         />
                       );
                     })}
@@ -380,6 +438,13 @@ export function TaskBoard({
                         onFocus={() => onStartTask(task.id)}
                         onMove={(status) => onMoveTask(task.id, status)}
                         onDelete={() => onDeleteTask(task.id)}
+                        isTimerEditing={editingTimerTaskId === task.id}
+                        timerHms={editingTimerHms}
+                        onTimerInputChange={setEditingTimerHms}
+                        onTimerEditStart={() => startEditTimer(task)}
+                        onTimerEditCancel={cancelEditTimer}
+                        onTimerSave={() => void saveTimer()}
+                        isSavingTimer={isSavingTimer}
                       />
                     );
                   })}
@@ -448,6 +513,13 @@ function TaskCard({
   onFocus,
   onMove,
   onDelete,
+  isTimerEditing,
+  timerHms,
+  onTimerInputChange,
+  onTimerEditStart,
+  onTimerEditCancel,
+  onTimerSave,
+  isSavingTimer,
 }: {
   task: Task;
   status: TaskStatus;
@@ -466,6 +538,13 @@ function TaskCard({
   onFocus: () => void;
   onMove: (status: TaskStatus) => void;
   onDelete: () => void;
+  isTimerEditing: boolean;
+  timerHms: string;
+  onTimerInputChange: (value: string) => void;
+  onTimerEditStart: () => void;
+  onTimerEditCancel: () => void;
+  onTimerSave: () => void;
+  isSavingTimer: boolean;
 }) {
   const stopPointer = (event: PointerEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -476,7 +555,7 @@ function TaskCard({
 
   const sortable = useSortable({
     id: `task-${task.id}`,
-    disabled: isEditing || isSavingEdit,
+    disabled: isEditing || isSavingEdit || isTimerEditing || isSavingTimer,
   });
 
   const style = {
@@ -486,16 +565,16 @@ function TaskCard({
   };
 
   const sortableBindings =
-    isEditing || isSavingEdit
+    isEditing || isSavingEdit || isTimerEditing || isSavingTimer
       ? {}
       : { ...sortable.attributes, ...sortable.listeners };
 
   return (
     <div
       ref={sortable.setNodeRef}
-      style={style}
       {...sortableBindings}
       className="rounded-xl border border-qf-border-secondary bg-qf-bg-secondary/50 p-3"
+      style={{ ...style, overflowAnchor: "none" }}
     >
       {isEditing ? (
         <div className="space-y-2">
@@ -508,7 +587,7 @@ function TaskCard({
             }}
             onPointerDown={stopPointer}
             onClick={stopClick}
-            className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-qf-border-accent"
+            className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-2.5 py-1.5 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
             autoFocus
             disabled={!isEditInteractive || isSavingEdit}
           />
@@ -519,7 +598,7 @@ function TaskCard({
             onClick={stopClick}
             rows={3}
             placeholder="Заметка к задаче..."
-            className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-qf-border-accent resize-none"
+            className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-2.5 py-1.5 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent resize-none"
             disabled={!isEditInteractive || isSavingEdit}
           />
           <div className="flex items-center gap-2">
@@ -530,7 +609,7 @@ function TaskCard({
                 onEditSave();
               }}
               disabled={!isEditInteractive || isSavingEdit || !canSaveEdit}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 transition-colors text-xs disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-qf-status-high-bg text-qf-status-high-text hover:brightness-110 transition-colors text-xs disabled:opacity-60"
             >
               Сохранить
             </button>
@@ -541,7 +620,7 @@ function TaskCard({
                 onEditCancel();
               }}
               disabled={!isEditInteractive || isSavingEdit}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-qf-border-secondary text-qf-text-secondary hover:text-white transition-colors text-xs"
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary transition-colors text-xs"
             >
               <X className="w-3 h-3" />
               Отмена
@@ -550,16 +629,68 @@ function TaskCard({
         </div>
       ) : (
         <>
-          <p className={`text-sm ${completed ? "line-through text-qf-text-muted" : "text-white"}`}>
+          <p className={`text-sm ${completed ? "line-through text-qf-text-muted" : "text-qf-text-primary"}`}>
             {task.title}
           </p>
           {task.contextSummary ? (
             <p className="mt-1 text-xs text-qf-text-secondary whitespace-pre-wrap">{task.contextSummary}</p>
           ) : null}
-          <p className="mt-1 text-xs text-qf-text-muted">
-            Время: {formatDurationHms(parseDurationMs(task.timerLog))}
-          </p>
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
+          {isTimerEditing ? (
+            <div className="mt-2">
+              <label className="sr-only" htmlFor={`task-timer-input-${task.id}`}>Время задачи</label>
+              <input
+                id={`task-timer-input-${task.id}`}
+                aria-label="Время задачи"
+                value={timerHms}
+                onChange={(e) => onTimerInputChange(e.target.value)}
+                onPointerDown={stopPointer}
+                onClick={stopClick}
+                className="h-7 w-[120px] rounded-md border border-qf-border-primary bg-qf-bg-secondary px-2 text-xs text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
+              />
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  onPointerDown={stopPointer}
+                  onClick={(event) => {
+                    stopClick(event);
+                    onTimerSave();
+                  }}
+                  disabled={isSavingTimer}
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-qf-status-high-bg text-qf-status-high-text hover:brightness-110 transition-colors text-xs disabled:opacity-60"
+                >
+                  Сохранить время
+                </button>
+                <button
+                  onPointerDown={stopPointer}
+                  onClick={(event) => {
+                    stopClick(event);
+                    onTimerEditCancel();
+                  }}
+                  disabled={isSavingTimer}
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary transition-colors text-xs"
+                >
+                  Отмена
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-1 text-xs text-qf-text-muted flex items-center gap-2">
+              <span>Время: {formatDurationHms(parseDurationMs(task.timerLog))}</span>
+              <button
+                id={`task-timer-edit-${task.id}`}
+                type="button"
+                onPointerDown={stopPointer}
+                onClick={(event) => {
+                  stopClick(event);
+                  onTimerEditStart();
+                }}
+                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary transition-colors text-xs"
+                aria-label="Редактировать время"
+              >
+                ✎
+              </button>
+            </div>
+          )}
+          <div className="mt-3 flex items-center gap-2 flex-nowrap">
             <select
               value={status}
               aria-label="Статус задачи"
@@ -571,7 +702,7 @@ function TaskCard({
                   onMove(nextStatus);
                 }
               }}
-              className="h-7 rounded-md border border-qf-border-secondary bg-qf-bg-secondary px-2 text-xs text-qf-text-secondary focus:outline-none focus:border-qf-border-accent"
+              className="h-7 rounded-md border border-qf-border-secondary bg-qf-bg-secondary px-2 text-xs text-qf-text-secondary focus:outline-none focus:border-qf-border-accent shrink-0"
             >
               <option value={TASK_STATUS.TODO}>К выполнению</option>
               <option value={TASK_STATUS.IN_PROGRESS}>В процессе</option>
@@ -585,7 +716,7 @@ function TaskCard({
                   stopClick(event);
                   onFocus();
                 }}
-                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 transition-colors text-xs"
+                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-qf-status-high-bg text-qf-status-high-text hover:brightness-110 transition-colors text-xs shrink-0"
               >
                 <Play className="w-3.5 h-3.5" />
                 Focus
@@ -597,11 +728,10 @@ function TaskCard({
                 stopClick(event);
                 onEditStart();
               }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-qf-border-secondary text-qf-text-secondary hover:text-white transition-colors text-xs"
+              className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary transition-colors shrink-0"
               aria-label="Редактировать"
             >
               <Pencil className="w-3.5 h-3.5" />
-              Редактировать
             </button>
             <button
               onPointerDown={stopPointer}
@@ -609,10 +739,10 @@ function TaskCard({
                 stopClick(event);
                 onDelete();
               }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-red-400/40 text-red-300 hover:text-white hover:border-red-300 transition-colors text-xs"
+              className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-[#ff5f33]/45 text-[#ff8d70] hover:text-qf-text-primary hover:border-[#ff5f33] transition-colors shrink-0"
+              aria-label="Удалить"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Удалить
             </button>
           </div>
         </>

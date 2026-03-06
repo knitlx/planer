@@ -10,6 +10,7 @@ import { quantumGradientClasses } from "@/lib/quantum-theme";
 import type { Task } from "@/types/project";
 import { ConfirmActionModal } from "@/components/ConfirmActionModal";
 import { AppModal } from "@/components/AppModal";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type TaskWithProject = Task & {
@@ -201,14 +202,14 @@ export default function TasksPage() {
       return {
         label: "Готово",
         icon: CheckCircle2,
-        className: "bg-cyan-500/20 text-cyan-200 border-cyan-500/30",
+        className: "bg-qf-status-low-bg text-qf-status-low-text border-qf-status-low-text/30",
       };
     }
     if (status === TASK_STATUS.IN_PROGRESS) {
       return {
         label: "В процессе",
         icon: PlayCircle,
-        className: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+        className: "bg-qf-status-high-bg text-qf-status-high-text border-qf-status-high-text/30",
       };
     }
     if (status === TASK_STATUS.CANCELLED) {
@@ -221,7 +222,7 @@ export default function TasksPage() {
     return {
       label: "К выполнению",
       icon: Circle,
-      className: "bg-qf-gradient-subtle text-cyan-200 border-qf-border-primary",
+      className: "bg-qf-gradient-subtle text-qf-text-accent border-qf-border-primary",
     };
   };
 
@@ -229,8 +230,8 @@ export default function TasksPage() {
     <section className="p-6 md:p-12 space-y-8 animate-in fade-in duration-300">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-qf-gradient-primary flex items-center justify-center">
-            <CheckSquare className="w-5 h-5 text-white" />
+          <div className="w-12 h-12 rounded-xl bg-qf-bg-secondary border border-qf-border-accent flex items-center justify-center">
+            <CheckSquare className="w-6 h-6 text-[#FFC300]" strokeWidth={2.5} />
           </div>
           <div>
             <h1 className={`text-3xl md:text-4xl font-bold ${quantumGradientClasses.text}`}>
@@ -242,7 +243,7 @@ export default function TasksPage() {
       </header>
 
       <div className="rounded-2xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-white">Новая задача</h2>
+        <h2 className="text-sm font-semibold text-qf-text-primary">Новая задача</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
           <label htmlFor="new-task-project" className="sr-only">
             Проект
@@ -251,7 +252,7 @@ export default function TasksPage() {
             id="new-task-project"
             value={newTaskProjectId}
             onChange={(event) => setNewTaskProjectId(event.target.value)}
-            className="rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent"
+            className="rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
           >
             <option value="">Выберите проект</option>
             {projects.map((project) => (
@@ -275,7 +276,7 @@ export default function TasksPage() {
           <button
             onClick={() => void handleCreateTask()}
             disabled={isCreatingTask || !newTaskTitle.trim() || !newTaskProjectId}
-            className="rounded-lg bg-qf-gradient-primary text-white text-sm px-3 py-2 disabled:opacity-50"
+            className="rounded-lg bg-[#FFC300] border border-[#FFC300] text-[#0A0908] text-sm font-semibold px-3 py-2 hover:brightness-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isCreatingTask ? "Создание..." : "Добавить"}
           </button>
@@ -318,8 +319,8 @@ export default function TasksPage() {
             onClick={() => setFilter(option.key)}
             className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${
               filter === option.key
-                ? "border-qf-border-accent bg-qf-gradient-subtle text-white"
-                : "border-qf-border-secondary text-qf-text-secondary hover:text-white"
+                ? "border-qf-border-accent bg-qf-gradient-subtle text-qf-text-primary"
+                : "border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary"
             }`}
           >
             {option.label}
@@ -343,13 +344,13 @@ export default function TasksPage() {
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium text-white">{task.title}</p>
+                    <p className="font-medium text-qf-text-primary">{task.title}</p>
                     {task.contextSummary ? (
                       <p className="mt-1 text-xs text-qf-text-secondary whitespace-pre-wrap">{task.contextSummary}</p>
                     ) : null}
                     <Link
                       href={`/focus/${task.projectId}`}
-                      className="mt-1 inline-block text-sm text-qf-text-secondary hover:text-white transition-colors"
+                      className="mt-1 inline-block text-sm text-qf-text-secondary hover:text-qf-text-primary transition-colors"
                     >
                       {task.projectName}
                     </Link>
@@ -366,7 +367,7 @@ export default function TasksPage() {
                     <button
                       disabled={updatingTaskId === task.id}
                       onClick={() => void handleUpdateTaskStatus(task.id, TASK_STATUS.IN_PROGRESS)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-qf-status-high-text/30 text-qf-status-high-text hover:bg-qf-status-high-bg transition-colors disabled:opacity-50"
                     >
                       В процессе
                     </button>
@@ -375,7 +376,7 @@ export default function TasksPage() {
                     <button
                       disabled={updatingTaskId === task.id}
                       onClick={() => void handleUpdateTaskStatus(task.id, TASK_STATUS.TODO)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-qf-border-secondary text-qf-text-secondary hover:text-white transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary transition-colors disabled:opacity-50"
                     >
                       К выполнению
                     </button>
@@ -384,7 +385,7 @@ export default function TasksPage() {
                     <button
                       disabled={updatingTaskId === task.id}
                       onClick={() => void handleUpdateTaskStatus(task.id, TASK_STATUS.DONE)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-purple-500/30 text-purple-300 hover:bg-purple-500/10 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-qf-status-low-text/30 text-qf-status-low-text hover:bg-qf-status-low-bg transition-colors disabled:opacity-50"
                     >
                       Готово
                     </button>
@@ -393,7 +394,7 @@ export default function TasksPage() {
                     <button
                       disabled={updatingTaskId === task.id}
                       onClick={() => void handleUpdateTaskStatus(task.id, TASK_STATUS.CANCELLED)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-slate-500/30 text-slate-300 hover:bg-slate-500/10 transition-colors disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-qf-border-secondary text-qf-text-secondary hover:bg-white/5 transition-colors disabled:opacity-50"
                     >
                       Отменить
                     </button>
@@ -401,7 +402,7 @@ export default function TasksPage() {
                   <button
                     disabled={updatingTaskId === task.id}
                     onClick={() => openEditTask(task)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-qf-border-secondary text-qf-text-secondary hover:text-white transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary transition-colors disabled:opacity-50"
                   >
                     Редактировать
                   </button>
@@ -436,19 +437,20 @@ export default function TasksPage() {
         onClose={() => setEditingTask(null)}
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <button
+            <Button
               onClick={() => setEditingTask(null)}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
+              className="w-full"
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => void handleSaveTaskEdit()}
               disabled={isSavingEdit || !editingTitle.trim()}
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
+              className="w-full"
             >
               {isSavingEdit ? "Сохранение..." : "Сохранить"}
-            </button>
+            </Button>
           </div>
         }
       >
@@ -472,11 +474,10 @@ export default function TasksPage() {
             onChange={(event) => setEditingNote(event.target.value)}
             rows={4}
             placeholder="Заметка"
-            className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent resize-none"
+            className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent resize-none"
           />
         </div>
       </AppModal>
     </section>
   );
 }
-

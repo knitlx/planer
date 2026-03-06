@@ -3,12 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { TaskBoard } from "@/components/TaskBoard";
-import type { ProjectStatus, ProjectWithMeta, Task, TaskStatus } from "@/types/project";
+import type { ProjectStatus, ProjectWithMeta, Task, TaskStatus, ProjectType } from "@/types/project";
 import { TASK_STATUS } from "@/lib/project-utils";
 import { AppModal } from "@/components/AppModal";
+import { getApiErrorMessage } from "@/lib/api-client";
 
 export default function FocusProjectPage() {
   const params = useParams();
@@ -32,9 +35,8 @@ export default function FocusProjectPage() {
   }, [projectId]);
 
   useEffect(() => {
-    if (searchParams.get("newTask") === "1") {
-      setShowAddTask(true);
-    }
+    if (searchParams.get("newTask") === "1") setShowAddTask(true);
+    if (searchParams.get("settings") === "1") setShowSettings(true);
   }, [searchParams]);
 
   const fetchProjectData = async () => {
@@ -64,6 +66,11 @@ export default function FocusProjectPage() {
     const cancelled = tasks.filter((task) => task.status === TASK_STATUS.CANCELLED).length;
     return { todo, inProgress, done, cancelled };
   }, [tasks]);
+
+  const projectWithMeta = useMemo(() => {
+    if (!project) return null;
+    return { ...project, tasks };
+  }, [project, tasks]);
 
   const handleStartTask = (taskId: string) => {
     router.push(`/focus/${projectId}/room?taskId=${taskId}`);
@@ -165,6 +172,23 @@ export default function FocusProjectPage() {
     }
   };
 
+  const handleUpdateTaskTimer = async (taskId: string, ms: number) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ timerLog: String(ms) }),
+      });
+      if (!response.ok) {
+        throw new Error("Не удалось обновить время задачи");
+      }
+      const updatedTask = (await response.json()) as Task;
+      setTasks((prev) => prev.map((task) => (task.id === taskId ? { ...task, timerLog: updatedTask.timerLog } : task)));
+    } catch {
+      toast.error("Ошибка обновления времени");
+    }
+  };
+
   const handleDeleteTask = async (taskId: string) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
@@ -182,6 +206,28 @@ export default function FocusProjectPage() {
     }
   };
 
+  const handleChangeProjectStatus = async (status: ProjectStatus) => {
+    try {
+      const payload: Record<string, unknown> = { status };
+      if (project?.status === "ACTIVE" && status !== "ACTIVE") {
+        payload.lastSessionNote = "Смена статуса без заметки";
+      }
+      const response = await fetch(`/api/projects/${projectId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as unknown;
+        throw new Error(getApiErrorMessage(payload) || "Не удалось обновить статус проекта");
+      }
+      const updated = (await response.json()) as ProjectWithMeta;
+      setProject((prev) => (prev ? { ...prev, status: updated.status } : prev));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ошибка обновления статуса проекта");
+    }
+  };
+
   const handleSaveSettings = async () => {
     if (!project) return;
 
@@ -196,6 +242,7 @@ export default function FocusProjectPage() {
           friction: project.friction || 5,
           deadline: project.deadline ? new Date(project.deadline).toISOString() : null,
           status: project.status,
+          type: project.type,
         }),
       });
 
@@ -230,7 +277,8 @@ export default function FocusProjectPage() {
   return (
     <section className="p-6 md:p-12 animate-in fade-in duration-300 space-y-8">
       <ProjectHeader
-        project={{ ...project, tasks }}
+        key={project.id}
+        project={projectWithMeta!}
         onBack={() => {
           if (typeof window !== "undefined" && window.history.length > 1) {
             router.back();
@@ -239,6 +287,7 @@ export default function FocusProjectPage() {
           router.push("/projects");
         }}
         onOpenSettings={() => setShowSettings(true)}
+        onChangeStatus={handleChangeProjectStatus}
       />
 
       <TaskBoard
@@ -255,24 +304,25 @@ export default function FocusProjectPage() {
         onRenameTask={handleRenameTask}
         onMoveTask={handleMoveTask}
         onDeleteTask={handleDeleteTask}
+        onUpdateTaskTimer={handleUpdateTaskTimer}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-4">
           <div className="text-2xl font-bold">{taskStats.todo}</div>
-          <div className="text-xs uppercase tracking-wider text-qf-text-muted">К выполнению</div>
+          <div className="text-xs tracking-wide text-qf-text-muted">К выполнению</div>
         </div>
         <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-4">
           <div className="text-2xl font-bold">{taskStats.inProgress}</div>
-          <div className="text-xs uppercase tracking-wider text-qf-text-muted">В процессе</div>
+          <div className="text-xs tracking-wide text-qf-text-muted">В процессе</div>
         </div>
         <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-4">
           <div className="text-2xl font-bold">{taskStats.done}</div>
-          <div className="text-xs uppercase tracking-wider text-qf-text-muted">Готово</div>
+          <div className="text-xs tracking-wide text-qf-text-muted">Готово</div>
         </div>
         <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-4">
           <div className="text-2xl font-bold">{taskStats.cancelled}</div>
-          <div className="text-xs uppercase tracking-wider text-qf-text-muted">Отменено</div>
+          <div className="text-xs tracking-wide text-qf-text-muted">Отменено</div>
         </div>
       </div>
 
@@ -282,24 +332,25 @@ export default function FocusProjectPage() {
         onClose={() => setShowSettings(false)}
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <button
+            <Button
               onClick={() => setShowSettings(false)}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
+              className="w-full"
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSaveSettings}
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity"
+              className="w-full"
             >
               Сохранить
-            </button>
+            </Button>
           </div>
         }
       >
         <div className="space-y-5">
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Название</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Название</label>
             <Input
               value={project.name}
               onChange={(event) => setProject({ ...project, name: event.target.value })}
@@ -307,33 +358,31 @@ export default function FocusProjectPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Описание</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Описание</label>
             <textarea
               value={project.description || ""}
               onChange={(event) => setProject({ ...project, description: event.target.value })}
               rows={4}
               placeholder="Краткое описание проекта..."
-              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-none"
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-none"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Дедлайн</label>
-            <Input
-              type="date"
+            <label className="text-xs tracking-wide text-qf-text-muted">Дедлайн</label>
+            <DatePicker
               value={project.deadline ? new Date(project.deadline).toISOString().slice(0, 10) : ""}
-              onChange={(event) =>
+              onChange={(next) =>
                 setProject({
                   ...project,
-                  deadline: event.target.value ? new Date(`${event.target.value}T00:00:00.000Z`).toISOString() : undefined,
+                  deadline: next ? new Date(`${next}T00:00:00.000Z`).toISOString() : undefined,
                 })
               }
-              className="bg-qf-bg-secondary border-qf-border-primary"
             />
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs uppercase tracking-wider text-qf-text-muted">Важность</label>
+              <label className="text-xs tracking-wide text-qf-text-muted">Важность</label>
               <span className="text-sm text-qf-text-secondary">{importance}%</span>
             </div>
             <input
@@ -342,23 +391,40 @@ export default function FocusProjectPage() {
               max={100}
               value={importance}
               onChange={(event) => setImportance(Number(event.target.value))}
-              className="w-full accent-purple-500"
+              className="w-full accent-[#ffc300]"
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Статус проекта</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Статус проекта</label>
             <select
               value={project.status}
               onChange={(event) =>
                 setProject({ ...project, status: event.target.value as ProjectStatus })
               }
-              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent"
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
             >
               <option value="INCUBATOR">Инкубатор</option>
               <option value="ACTIVE">В работе</option>
               <option value="SNOOZED">На паузе</option>
               <option value="FINAL_STRETCH">Финальный рывок</option>
+              <option value="DONE">Готово</option>
             </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs tracking-wide text-qf-text-muted">Тип проекта</label>
+            <select
+              value={project.type || "NORMAL"}
+              onChange={(event) =>
+                setProject({ ...project, type: event.target.value as ProjectType })
+              }
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
+            >
+              <option value="NORMAL">Обычный</option>
+              <option value="MANDATORY">Обязательный</option>
+            </select>
+            <p className="text-xs text-qf-text-muted">
+              Обязательные проекты показываются первыми и должны быть выполнены, чтобы разблокировать доступ к обычным проектам.
+            </p>
           </div>
         </div>
       </AppModal>

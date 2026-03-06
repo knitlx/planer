@@ -101,19 +101,19 @@ export function AppModal({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
-        className={`w-full ${maxWidthClassName} rounded-2xl border border-qf-border-glass bg-qf-bg-glass backdrop-blur-xl p-6 md:p-8`}
+        className={`w-full ${maxWidthClassName} rounded-2xl border border-qf-border-primary bg-qf-bg-glass backdrop-blur-xl p-6 md:p-8 shadow-[0_20px_45px_rgba(0,0,0,0.55)]`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 id={titleId} className="text-2xl font-bold">{title}</h3>
+            <h3 id={titleId} className="text-2xl font-semibold tracking-tight font-[var(--font-unbounded)]">{title}</h3>
             {description && <p id={descriptionId} className="text-qf-text-secondary mt-2">{description}</p>}
           </div>
           <button
             onClick={onClose}
             disabled={disableClose}
             aria-label="Закрыть"
-            className="w-8 h-8 rounded-lg border border-qf-border-secondary text-qf-text-muted hover:text-white hover:border-qf-border-primary transition-colors disabled:opacity-50"
+            className="w-8 h-8 rounded-lg border border-qf-border-secondary text-qf-text-muted hover:text-qf-text-primary hover:border-qf-border-primary transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4 mx-auto" />
           </button>

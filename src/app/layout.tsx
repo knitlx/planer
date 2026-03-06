@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Geologica, JetBrains_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { QuantumSidebar } from "@/components/QuantumSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getSiteUrl } from "@/lib/site-url";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin", "latin-ext"],
+const geologica = Geologica({
+  subsets: ["latin", "latin-ext", "cyrillic"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-space-grotesk",
+  variable: "--font-geologica",
+});
+
+const unbounded = Unbounded({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  weight: ["500", "600", "700"],
+  variable: "--font-unbounded",
 });
 
 const jetBrainsMono = JetBrains_Mono({
@@ -55,13 +61,13 @@ export default function RootLayout({
     <html
       lang="ru"
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${jetBrainsMono.variable}`}
+      className={`${geologica.variable} ${unbounded.variable} ${jetBrainsMono.variable}`}
     >
       <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <div className="quantum-bg" aria-hidden />
           <QuantumSidebar />
-          <main className="lg:pl-64 min-h-screen text-white pt-16 lg:pt-0">{children}</main>
+          <main className="lg:pl-64 min-h-screen pt-16 lg:pt-0">{children}</main>
           <Toaster />
         </ThemeProvider>
       </body>

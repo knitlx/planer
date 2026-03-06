@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, ArrowRight, Trash2 } from "lucide-react";
+import { Lightbulb, ArrowRight, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { ConfirmActionModal } from "@/components/ConfirmActionModal";
 import { AppModal } from "@/components/AppModal";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { useHotkeys } from "react-hotkeys-hook";
 
 interface Idea {
   id: string;
@@ -28,6 +29,7 @@ type IdeaStatusFilter = "ALL" | IdeaStatus;
 interface ProjectOption {
   id: string;
   name: string;
+  status?: "INCUBATOR" | "ACTIVE" | "SNOOZED" | "FINAL_STRETCH" | "DONE";
 }
 
 type ConversionMode = "task" | "project" | null;
@@ -55,6 +57,9 @@ export default function IdeasPage() {
   const [ideaToDelete, setIdeaToDelete] = useState<Idea | null>(null);
   const [isDeletingIdea, setIsDeletingIdea] = useState(false);
   const [isArchivingIdea, setIsArchivingIdea] = useState(false);
+  const [showCreateIdeaModal, setShowCreateIdeaModal] = useState(false);
+  const [newIdeaContent, setNewIdeaContent] = useState("");
+  const [isCreatingIdea, setIsCreatingIdea] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -63,6 +68,19 @@ export default function IdeasPage() {
   useEffect(() => {
     fetchIdeas(statusFilter);
   }, [statusFilter]);
+
+  const openCreateIdeaModal = () => {
+    setShowCreateIdeaModal(true);
+    setTimeout(() => {
+      const input = document.getElementById("new-idea-input");
+      input?.focus();
+    }, 0);
+  };
+
+  useHotkeys("ctrl+k, meta+k", (event) => {
+    event.preventDefault();
+    openCreateIdeaModal();
+  });
 
   const fetchIdeas = async (status: IdeaStatusFilter) => {
     try {
@@ -81,7 +99,7 @@ export default function IdeasPage() {
       const res = await fetch("/api/projects");
       if (!res.ok) throw new Error("Failed to fetch projects");
       const data = (await res.json()) as ProjectOption[];
-      setProjects(data);
+      setProjects(data.filter((project) => project.status !== "DONE"));
     } catch (error) {
       toast.error("Не удалось загрузить проекты");
     }
@@ -187,6 +205,37 @@ export default function IdeasPage() {
     }
   };
 
+  const handleCreateIdea = async () => {
+    const content = newIdeaContent.trim();
+    if (!content) return;
+
+    setIsCreatingIdea(true);
+    try {
+      const response = await fetch("/api/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, source: "Web" }),
+      });
+
+      if (!response.ok) {
+        toast.error("Не удалось сохранить идею");
+        return;
+      }
+
+      toast.success("Идея добавлена");
+      setShowCreateIdeaModal(false);
+      setNewIdeaContent("");
+      if (statusFilter !== "INBOX" && statusFilter !== "ALL") {
+        setStatusFilter("INBOX");
+      }
+      await fetchIdeas(statusFilter === "ALL" ? "ALL" : "INBOX");
+    } catch {
+      toast.error("Ошибка");
+    } finally {
+      setIsCreatingIdea(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen p-6">
@@ -206,13 +255,15 @@ export default function IdeasPage() {
     <div className="min-h-screen p-6">
       <div className="max-w-2xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-text-primary">Идеи</h1>
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-3xl font-bold text-text-primary">Идеи</h1>
+          </div>
           <p className="text-text-secondary mt-2">Записывайте мысли, которые станут задачами</p>
         </header>
 
         <div className="card p-4 mb-4">
           <h2 className="text-sm font-medium text-text-secondary flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-cyan-300" />
+            <Lightbulb className="w-4 h-4 text-qf-text-accent" />
             Идеи
           </h2>
           <div className="flex flex-wrap gap-2 my-4">
@@ -222,8 +273,8 @@ export default function IdeasPage() {
                 onClick={() => setStatusFilter(filter.value)}
                 className={`px-3 py-1.5 rounded-lg border text-xs transition-colors ${
                   statusFilter === filter.value
-                    ? "border-qf-border-accent bg-qf-gradient-subtle text-white"
-                    : "border-qf-border-secondary text-qf-text-secondary hover:text-white"
+                    ? "border-qf-border-accent bg-qf-gradient-subtle text-qf-text-primary"
+                    : "border-qf-border-secondary text-qf-text-secondary hover:text-qf-text-primary"
                 }`}
               >
                 {filter.label}
@@ -234,6 +285,14 @@ export default function IdeasPage() {
           {ideas.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-text-muted text-sm">Пока нет идей</p>
+              <button
+                type="button"
+                onClick={openCreateIdeaModal}
+                className="mt-4 mx-auto w-10 h-10 rounded-xl bg-[#ffc300]/12 border border-[#ffc300]/25 text-qf-text-accent flex items-center justify-center hover:bg-[#ffc300]/18 transition-colors"
+                aria-label="Добавить идею"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
             </div>
           ) : (
             <div className="space-y-3">
@@ -268,7 +327,7 @@ export default function IdeasPage() {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-qf-gradient-primary text-white text-xs h-7 hover:opacity-90"
+                          className="bg-qf-gradient-primary text-[#0A0908] text-xs h-7 hover:opacity-90"
                           onClick={() => openProjectConversion(idea)}
                         >
                           Проект <ArrowRight className="w-3 h-3 ml-1" />
@@ -286,12 +345,12 @@ export default function IdeasPage() {
                     ) : (
                       <div className="text-xs text-qf-text-secondary">
                         {idea.status === "CONVERTED_TO_TASK" && idea.projectId && (
-                          <Link href={`/focus/${idea.projectId}`} className="hover:text-white transition-colors">
+                          <Link href={`/focus/${idea.projectId}`} className="hover:text-qf-text-primary transition-colors">
                             Открыть проект
                           </Link>
                         )}
                         {idea.status === "CONVERTED_TO_PROJECT" && idea.convertedEntityId && (
-                          <Link href={`/focus/${idea.convertedEntityId}`} className="hover:text-white transition-colors">
+                          <Link href={`/focus/${idea.convertedEntityId}`} className="hover:text-qf-text-primary transition-colors">
                             Открыть проект
                           </Link>
                         )}
@@ -314,6 +373,58 @@ export default function IdeasPage() {
       </div>
 
       <AppModal
+        open={showCreateIdeaModal}
+        title="Новая идея"
+        onClose={() => {
+          if (isCreatingIdea) return;
+          setShowCreateIdeaModal(false);
+          setNewIdeaContent("");
+        }}
+        disableClose={isCreatingIdea}
+        footer={
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() => {
+                setShowCreateIdeaModal(false);
+                setNewIdeaContent("");
+              }}
+              variant="secondary"
+              className="w-full"
+              disabled={isCreatingIdea}
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleCreateIdea}
+              className="w-full"
+              disabled={isCreatingIdea || !newIdeaContent.trim()}
+            >
+              {isCreatingIdea ? "Сохранение..." : "Сохранить"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-2">
+          <label htmlFor="new-idea-input" className="text-xs tracking-wide text-qf-text-muted">
+            Идея
+          </label>
+          <Input
+            id="new-idea-input"
+            value={newIdeaContent}
+            onChange={(event) => setNewIdeaContent(event.target.value)}
+            placeholder="Введите идею..."
+            className="bg-qf-bg-secondary border-qf-border-primary"
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                void handleCreateIdea();
+              }
+            }}
+          />
+        </div>
+      </AppModal>
+
+      <AppModal
         open={Boolean(activeIdea && mode === "task")}
         title="Преобразовать в задачу"
         description={activeIdea?.content}
@@ -321,14 +432,15 @@ export default function IdeasPage() {
         disableClose={isSubmitting}
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <button
+            <Button
               onClick={resetConversionState}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
+              className="w-full"
               disabled={isSubmitting}
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() =>
                 activeIdea &&
                 handleProcess(activeIdea.id, "convert_to_task", {
@@ -336,21 +448,21 @@ export default function IdeasPage() {
                   title: taskTitle,
                 })
               }
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full"
               disabled={isSubmitting || !taskProjectId || !taskTitle.trim()}
             >
               {isSubmitting ? "Сохранение..." : "Создать задачу"}
-            </button>
+            </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Проект</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Проект</label>
             <select
               value={taskProjectId}
               onChange={(event) => setTaskProjectId(event.target.value)}
-              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent"
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
             >
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
@@ -360,7 +472,7 @@ export default function IdeasPage() {
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Название задачи</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Название задачи</label>
             <Input
               value={taskTitle}
               onChange={(event) => setTaskTitle(event.target.value)}
@@ -378,14 +490,15 @@ export default function IdeasPage() {
         disableClose={isSubmitting}
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <button
+            <Button
               onClick={resetConversionState}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
+              className="w-full"
               disabled={isSubmitting}
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() =>
                 activeIdea &&
                 handleProcess(activeIdea.id, "convert_to_project", {
@@ -394,17 +507,17 @@ export default function IdeasPage() {
                   weight: projectWeight,
                 })
               }
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full"
               disabled={isSubmitting || !projectName.trim()}
             >
               {isSubmitting ? "Сохранение..." : "Создать проект"}
-            </button>
+            </Button>
           </div>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Название проекта</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Название проекта</label>
             <Input
               value={projectName}
               onChange={(event) => setProjectName(event.target.value)}
@@ -413,7 +526,7 @@ export default function IdeasPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Первая задача (опционально)</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Первая задача (опционально)</label>
             <Input
               value={seedTaskTitle}
               onChange={(event) => setSeedTaskTitle(event.target.value)}
@@ -421,14 +534,14 @@ export default function IdeasPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">Важность: {projectWeight}/10</label>
+            <label className="text-xs tracking-wide text-qf-text-muted">Важность: {projectWeight}/10</label>
             <input
               type="range"
               min={1}
               max={10}
               value={projectWeight}
               onChange={(event) => setProjectWeight(Number(event.target.value))}
-              className="w-full accent-purple-500"
+              className="w-full accent-[#ffc300]"
             />
           </div>
         </div>
@@ -446,4 +559,3 @@ export default function IdeasPage() {
     </div>
   );
 }
-

@@ -4,8 +4,10 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { quantumGradientClasses } from "@/lib/quantum-theme";
-import type { ProjectStatus } from "@/types/project";
+import type { ProjectStatus, ProjectType } from "@/types/project";
 
 type CreateProjectResponse = {
   id: string;
@@ -18,6 +20,7 @@ export default function NewFocusProjectPage() {
   const [weight, setWeight] = useState(5);
   const [deadline, setDeadline] = useState("");
   const [status, setStatus] = useState<ProjectStatus>("ACTIVE");
+  const [type, setType] = useState<ProjectType>("NORMAL");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -36,6 +39,7 @@ export default function NewFocusProjectPage() {
           weight,
           deadline: deadline ? new Date(`${deadline}T00:00:00.000Z`).toISOString() : null,
           status,
+          type,
         }),
       });
 
@@ -65,7 +69,7 @@ export default function NewFocusProjectPage() {
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+            <label className="text-xs tracking-wide text-qf-text-muted">
               Название проекта
             </label>
             <Input
@@ -80,7 +84,7 @@ export default function NewFocusProjectPage() {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+              <label className="text-xs tracking-wide text-qf-text-muted">
                 Важность
               </label>
               <span className="text-sm text-qf-text-secondary">{weight}/10</span>
@@ -91,71 +95,87 @@ export default function NewFocusProjectPage() {
               max={10}
               value={weight}
               onChange={(event) => setWeight(Number(event.target.value))}
-              className="w-full accent-purple-500"
+              className="w-full accent-[#ffc300]"
               disabled={isSubmitting}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+            <label className="text-xs tracking-wide text-qf-text-muted">
               Описание
             </label>
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               placeholder="Краткое описание проекта (опционально)"
-              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-none"
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-none"
               rows={4}
               disabled={isSubmitting}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+            <label className="text-xs tracking-wide text-qf-text-muted">
               Дедлайн
             </label>
-            <Input
-              type="date"
+            <DatePicker
               value={deadline}
-              onChange={(event) => setDeadline(event.target.value)}
-              className="bg-qf-bg-secondary border-qf-border-primary"
+              onChange={setDeadline}
               disabled={isSubmitting}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-wider text-qf-text-muted">
+            <label className="text-xs tracking-wide text-qf-text-muted">
               Статус проекта
             </label>
             <select
               value={status}
               onChange={(event) => setStatus(event.target.value as ProjectStatus)}
-              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:border-qf-border-accent"
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
               disabled={isSubmitting}
             >
               <option value="ACTIVE">В работе</option>
               <option value="SNOOZED">На паузе</option>
               <option value="FINAL_STRETCH">Финальный рывок</option>
               <option value="INCUBATOR">Инкубатор</option>
+              <option value="DONE">Готово</option>
             </select>
           </div>
 
+          <div className="space-y-2">
+            <label className="text-xs tracking-wide text-qf-text-muted">
+              Тип проекта
+            </label>
+            <select
+              value={type}
+              onChange={(event) => setType(event.target.value as ProjectType)}
+              className="w-full rounded-lg border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary focus:outline-none focus:border-qf-border-accent"
+              disabled={isSubmitting}
+            >
+              <option value="NORMAL">Обычный</option>
+              <option value="MANDATORY">Обязательный</option>
+            </select>
+            <p className="text-xs text-qf-text-muted">
+              Обязательные проекты показываются первыми и должны быть выполнены, чтобы разблокировать доступ к обычным проектам.
+            </p>
+          </div>
+
           <div className="flex flex-wrap gap-3 pt-2">
-            <button
+            <Button
               type="button"
               onClick={() => router.back()}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
               disabled={isSubmitting}
             >
               Назад
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={isSubmitting || !name.trim()}
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
             >
               {isSubmitting ? "Создание..." : "Создать проект"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

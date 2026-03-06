@@ -96,7 +96,7 @@ export default function ReviewPage() {
 
           {staleProjects.length > 0 && (
             <div className="card p-6 border-qf-border-primary">
-              <h2 className="text-lg font-semibold text-cyan-300 mb-4">
+              <h2 className="text-lg font-semibold text-qf-text-accent mb-4">
                 Без активности
               </h2>
               <div className="space-y-2">
@@ -105,7 +105,7 @@ export default function ReviewPage() {
                     key={project.id}
                     className="flex items-center gap-3 p-3 text-text-muted"
                   >
-                    <span className="text-cyan-300">⏰</span>
+                    <span className="text-qf-text-accent">⏰</span>
                     <span>{project.name}</span>
                     <span className="text-xs">
                       (

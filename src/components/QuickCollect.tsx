@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
 
 export function QuickCollect() {
   const shortcutHintId = "quick-collect-shortcut-hint";
@@ -71,53 +70,36 @@ export function QuickCollect() {
   };
 
   return (
-    <>
-      <div className="quantum-glass p-6">
-        <div className="flex items-center justify-between mb-6 gap-3">
-          <h3 className="text-xl font-bold gradient-text">БЫСТРЫЙ СБОР ИДЕЙ</h3>
-          <div className="text-sm text-dim text-right">
-            <span className="text-cyan-400">{inboxCount} необработанных идей</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4">
-          <label htmlFor="quick-collect-input" className="sr-only">
-            Быстрый ввод идеи
-          </label>
-          <input
-            id="quick-collect-input"
-            type="text"
-            value={content}
-            onChange={(event) => setContent(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") handleSubmit();
-            }}
-            placeholder="Запишите идею, мысль или задачу..."
-            aria-describedby={shortcutHintId}
-            className="flex-1 px-4 py-3 rounded-xl bg-gray-900/50 border border-quantum focus:border-cyan-500/50 focus:outline-none transition-colors"
-            disabled={isSubmitting}
-          />
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !content.trim()}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-black font-bold hover:shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all disabled:opacity-50"
-          >
-            {isSubmitting ? "Сохранение..." : "Сохранить"}
-          </button>
-        </div>
-
-        <div id={shortcutHintId} className="mt-4 text-sm text-dim">
-          Используйте Ctrl/⌘ + K для быстрого доступа к сбору идей из любого места
-        </div>
-      </div>
-
-      <button
-        onClick={focusInput}
-        className="fixed bottom-6 right-4 md:bottom-8 md:right-8 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center shadow-[0_0_30px_rgba(0,229,255,0.4)] hover:scale-110 transition-transform z-40"
-        aria-label="Открыть быстрый сбор"
+    <div className="compact-input px-6 py-5 rounded-[20px] flex items-center shadow-2xl relative">
+      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <span className="mr-4 text-qf-text-accent text-xl">⚡</span>
+      <form
+        className="w-full"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleSubmit();
+        }}
       >
-        <Plus className="w-6 h-6 text-black" strokeWidth={2.5} />
-      </button>
-    </>
+        <label htmlFor="quick-collect-input" className="sr-only">
+          Быстрый ввод идеи
+        </label>
+        <input
+          id="quick-collect-input"
+          type="text"
+          value={content}
+          onChange={(event) => setContent(event.target.value)}
+          placeholder="Быстрый ввод (Enter)..."
+          aria-describedby={shortcutHintId}
+          className="bg-transparent border-none outline-none w-full text-base font-medium placeholder:text-qf-text-muted text-qf-text-primary"
+          disabled={isSubmitting}
+        />
+      </form>
+      <div className="ml-4 text-[10px] font-bold text-qf-text-muted whitespace-nowrap font-[var(--font-unbounded)]">
+        {inboxCount} идей
+      </div>
+      <div id={shortcutHintId} className="sr-only">
+        Используйте Ctrl/⌘ + K для быстрого доступа к сбору идей
+      </div>
+    </div>
   );
 }

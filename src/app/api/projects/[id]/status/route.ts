@@ -10,7 +10,7 @@ import {
 } from "@/lib/api-validation";
 
 const WIP_LIMIT = 3;
-const PROJECT_STATUSES = ["INCUBATOR", "ACTIVE", "SNOOZED", "FINAL_STRETCH"] as const;
+const PROJECT_STATUSES = ["INCUBATOR", "ACTIVE", "SNOOZED", "FINAL_STRETCH", "DONE"] as const;
 
 export async function PUT(
   request: Request,

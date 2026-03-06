@@ -253,7 +253,7 @@ export function TheFocusRoom() {
         >
           <h1 className="text-4xl font-bold text-white mb-4">{project.name}</h1>
           <div className="mb-4 rounded-xl border border-qf-border-secondary bg-qf-bg-glass px-4 py-3">
-            <p className="text-xs uppercase tracking-wider text-qf-text-muted mb-1">Идет фокус-сессия</p>
+            <p className="text-xs tracking-wide text-qf-text-muted mb-1">Идет фокус-сессия</p>
             <p className="text-4xl font-mono font-bold gradient-text">{formatDurationHms(displayElapsedMs)}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
@@ -309,7 +309,7 @@ export function TheFocusRoom() {
             </div>
           </div>
           <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-glass px-4 py-3">
-            <p className="text-xs uppercase tracking-wider text-qf-text-muted mb-2">
+            <p className="text-xs tracking-wide text-qf-text-muted mb-2">
               Заметка сессии проекта
             </p>
             <textarea
@@ -352,10 +352,10 @@ export function TheFocusRoom() {
               <h2 className="text-2xl font-semibold mb-4">
                 {currentTask.title}
               </h2>
-              <p className="mb-4 text-xs uppercase tracking-wider text-qf-text-muted">Задача в фокусе</p>
+              <p className="mb-4 text-xs tracking-wide text-qf-text-muted">Задача в фокусе</p>
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-qf-text-muted mb-2">
+                  <p className="text-xs tracking-wide text-qf-text-muted mb-2">
                     Заметка задачи
                   </p>
                   <textarea
@@ -402,21 +402,23 @@ export function TheFocusRoom() {
         onClose={() => setLeavePromptOpen(false)}
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <button
+            <Button
               onClick={() => setLeavePromptOpen(false)}
-              className="px-4 py-2 rounded-lg border border-qf-border-primary text-qf-text-secondary hover:text-white transition-colors"
+              variant="secondary"
+              className="w-full"
             >
               Остаться
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 setLeavePromptOpen(false);
                 void leaveFocusRoom(currentProjectId, false);
               }}
-              className="px-4 py-2 rounded-lg bg-qf-gradient-primary text-white hover:opacity-90 transition-opacity"
+              variant="destructive"
+              className="w-full"
             >
               Выйти без сохранения
-            </button>
+            </Button>
           </div>
         }
       >

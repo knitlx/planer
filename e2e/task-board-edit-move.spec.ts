@@ -33,6 +33,13 @@ test.describe("Task board editing and moving", () => {
       const project = (await response.json()) as { progress: number };
       return project.progress;
     };
+    const taskTimerFromApi = async (api: APIRequestContext, currentProjectId: string, currentTaskId: string) => {
+      const response = await api.get(`/api/tasks?projectId=${currentProjectId}`);
+      expect(response.ok()).toBeTruthy();
+      const items = (await response.json()) as Array<{ id: string; timerLog?: string | null }>;
+      const taskItem = items.find((item) => item.id === currentTaskId);
+      return Number(taskItem?.timerLog ?? 0);
+    };
 
     try {
       const projectRes = await request.post("/api/projects", {
@@ -67,6 +74,17 @@ test.describe("Task board editing and moving", () => {
 
       await expect(page.getByRole("button", { name: "Сохранить" })).toHaveCount(0);
       await expect(page.getByText(renamedTitle)).toBeVisible();
+
+      const timerCard = taskCardByTitle(renamedTitle, page);
+      await timerCard.getByRole("button", { name: "Редактировать время" }).click();
+      const timerInput = timerCard.getByLabel("Время задачи");
+      await expect(timerInput).toBeVisible();
+      await timerInput.fill("00:12:34");
+      await timerCard.getByRole("button", { name: "Сохранить время" }).click();
+      await expect(timerCard.getByText("Время: 00:12:34")).toBeVisible();
+      await expect
+        .poll(async () => taskTimerFromApi(request, projectId!, taskId!))
+        .toBe(754000);
 
       await expect
         .poll(async () => taskStatusFromApi(request, projectId!, taskId!))

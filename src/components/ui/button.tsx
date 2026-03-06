@@ -5,19 +5,19 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-qf-border-accent disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-qf-border-accent disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-qf-gradient-primary text-white hover:opacity-90 shadow-[0_0_20px_rgba(0,229,255,0.2)]",
+          "bg-[#FFC300] text-[#0A0908] border border-[#FFC300] hover:brightness-105",
         destructive:
-          "bg-red-500/90 text-white hover:bg-red-500 border border-red-400/30",
+          "bg-[#ff5f33] text-[#0A0908] hover:brightness-110 border border-[#ff5f33]/40",
         outline:
-          "border border-qf-border-primary bg-qf-bg-secondary/80 text-qf-text-secondary hover:text-white hover:border-qf-border-accent hover:bg-[rgba(138,43,226,0.1)]",
+          "border border-qf-border-primary bg-qf-bg-secondary text-qf-text-primary hover:border-qf-border-accent hover:bg-qf-bg-tertiary",
         secondary:
-          "border border-qf-border-secondary bg-qf-bg-secondary/70 text-white hover:bg-qf-bg-tertiary",
-        ghost: "text-qf-text-secondary hover:text-white hover:bg-[rgba(138,43,226,0.1)]",
+          "border border-qf-border-secondary bg-qf-bg-secondary text-qf-text-primary hover:border-qf-border-accent hover:bg-qf-bg-tertiary",
+        ghost: "text-qf-text-secondary hover:text-qf-text-primary hover:bg-white/5",
         link: "text-qf-text-accent underline-offset-4 hover:underline",
       },
       size: {
