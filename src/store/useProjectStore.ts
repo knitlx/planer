@@ -20,6 +20,20 @@ interface ProjectState {
     status: ProjectStatus,
     lastSessionNote?: string,
   ) => Promise<void>;
+  updateProject: (
+    id: string,
+    updates: Partial<{
+      name: string;
+      description: string;
+      lastSessionNote: string;
+      weight: number;
+      friction: number;
+      deadline: string | null;
+      status: ProjectStatus;
+      type: "MANDATORY" | "NORMAL";
+      todayCompleted: boolean;
+    }>,
+  ) => Promise<void>;
   setFilter: (filter: string) => void;
   setSortBy: (sortBy: "score" | "progress" | "recent") => void;
 }
@@ -65,6 +79,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     if (!response.ok) {
       const payload = (await response.json()) as unknown;
       throw new Error(getApiErrorMessage(payload) || "Не удалось обновить статус");
+    }
+    await get().fetchProjects();
+  },
+
+  updateProject: async (id, updates) => {
+    const response = await fetch(`/api/projects/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    if (!response.ok) {
+      const payload = (await response.json()) as unknown;
+      throw new Error(getApiErrorMessage(payload) || "Не удалось обновить проект");
     }
     await get().fetchProjects();
   },

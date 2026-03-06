@@ -1,5 +1,6 @@
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE" | "CANCELLED";
-export type ProjectStatus = "INCUBATOR" | "ACTIVE" | "SNOOZED" | "FINAL_STRETCH";
+export type ProjectStatus = "INCUBATOR" | "ACTIVE" | "SNOOZED" | "FINAL_STRETCH" | "DONE";
+export type ProjectType = "MANDATORY" | "NORMAL";
 
 export interface Task {
   id: string;
@@ -24,6 +25,9 @@ export interface Project {
   weight: number;
   progress: number;
   status: ProjectStatus;
+  type: ProjectType;
+  todayCompleted: boolean;
+  lastCompletedAt?: string | Date | null;
   friction: number;
   lastActive: string | Date;
   lastSessionNote?: string | null;
@@ -37,4 +41,22 @@ export interface Project {
 export interface ProjectWithMeta extends Project {
   focusScore?: number;
   daysStale?: number;
+}
+
+export interface Habit {
+  id: string;
+  name: string;
+  description?: string | null;
+  projectId?: string | null;
+  currentStreak: number;
+  bestStreak: number;
+  createdAt?: string | Date;
+  logs?: HabitLog[];
+}
+
+export interface HabitLog {
+  id: string;
+  habitId: string;
+  date: string;
+  completed: boolean;
 }

@@ -20,3 +20,9 @@ export function getPriorityLabel(weight: number): string {
   if (weight >= 5) return "Средний";
   return "Низкий";
 }
+
+export function getPriorityFireIcons(weight: number): string {
+  if (weight >= 8) return "🔥🔥🔥";
+  if (weight >= 5) return "🔥🔥";
+  return "🔥";
+}

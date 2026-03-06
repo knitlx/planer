@@ -24,7 +24,7 @@ export function NewProjectButton() {
     <>
       <Button
         onClick={() => setIsDialogOpen(true)}
-        className="bg-qf-gradient-primary text-white font-medium hover:opacity-90"
+        className="bg-qf-gradient-primary text-[#0A0908] font-semibold hover:opacity-90"
       >
         + Новый проект
       </Button>
@@ -78,7 +78,7 @@ export function NewProjectButton() {
                   type="submit"
                   size="sm"
                   disabled={!name.trim()}
-                  className="flex-1 bg-qf-gradient-primary text-white font-medium hover:opacity-90"
+                  className="flex-1 bg-qf-gradient-primary text-[#0A0908] font-semibold hover:opacity-90"
                 >
                   Создать
                 </Button>

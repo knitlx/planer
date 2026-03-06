@@ -18,11 +18,15 @@ model Project {
   friction        Int           @default(5)
   progress        Float         @default(0)
   status          ProjectStatus @default(INCUBATOR)
+  type            ProjectType   @default(NORMAL)
+  todayCompleted  Boolean       @default(false)
+  lastCompletedAt DateTime?
   lastActive      DateTime      @default(now())
   lastSessionNote String?
   tasks           Task[]
   ideas           Idea[]
   notificationLogs NotificationLog[]
+  habits          Habit[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -89,6 +93,7 @@ enum ProjectStatus {
   ACTIVE
   SNOOZED
   FINAL_STRETCH
+  DONE
 }
 
 enum TaskType {
@@ -113,4 +118,32 @@ enum IdeaStatus {
 enum ConvertedEntityType {
   TASK
   PROJECT
+}
+
+enum ProjectType {
+  MANDATORY
+  NORMAL
+}
+
+model Habit {
+  id            String     @id @default(cuid())
+  name          String
+  description   String?
+  projectId     String?
+  project       Project?   @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  currentStreak Int        @default(0)
+  bestStreak    Int        @default(0)
+  createdAt     DateTime   @default(now())
+
+  logs          HabitLog[]
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date      String
+  completed Boolean  @default(false)
+
+  @@unique([habitId, date])
 }

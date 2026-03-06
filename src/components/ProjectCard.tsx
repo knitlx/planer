@@ -3,17 +3,12 @@
 import { motion } from "framer-motion";
 import type { Project, Task } from "@prisma/client";
 import { ChevronRight, Clock } from "lucide-react";
+import { getPriorityFireIcons } from "@/lib/project-utils";
 
 interface ProjectCardProps {
   project: Project & { tasks?: Task[] };
   onSelect: () => void;
 }
-
-const getPriorityLabel = (weight: number | null): string => {
-  if (weight === null || weight < 33) return "Низкий";
-  if (weight < 66) return "Средний";
-  return "Высокий";
-};
 
 export function ProjectCard({ project, onSelect }: ProjectCardProps) {
   const progress = project.progress ?? 0;
@@ -29,14 +24,6 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
   const isComplete = progress >= 100;
   const isHot = progress >= 50 && progress < 100;
   const isStale = daysSinceUpdate > 3 && !isComplete;
-
-  const priorityClass =
-    "text-[10px] px-2 py-0.5 rounded font-medium " +
-    ((project.weight ?? 0) >= 66
-      ? "bg-rose-500/10 text-rose-400"
-      : (project.weight ?? 0) >= 33
-        ? "bg-amber-500/10 text-amber-400"
-        : "bg-text-muted/20 text-text-secondary");
 
   return (
     <motion.div
@@ -57,8 +44,8 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
             {project.name}
           </h3>
           <div className="flex items-center gap-2 mt-2">
-            <span className={priorityClass}>
-              {getPriorityLabel(project.weight)}
+            <span className="text-[11px] text-qf-text-secondary">
+              {getPriorityFireIcons(project.weight ?? 5)}
             </span>
             {isComplete && (
               <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-medium border border-cyan-400/25">
@@ -87,7 +74,7 @@ export function ProjectCard({ project, onSelect }: ProjectCardProps) {
           >
             {progress}
           </div>
-          <div className="text-[9px] text-text-muted uppercase">%</div>
+          <div className="text-[9px] text-text-muted">%</div>
         </div>
       </div>
 
