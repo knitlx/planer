@@ -12,12 +12,14 @@ import type { ProjectStatus, ProjectWithMeta, Task, TaskStatus, ProjectType } fr
 import { TASK_STATUS } from "@/lib/project-utils";
 import { AppModal } from "@/components/AppModal";
 import { getApiErrorMessage } from "@/lib/api-client";
+import { useProjectStore } from "@/store/useProjectStore";
 
 export default function FocusProjectPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const projectId = params.projectId as string;
+  const { fetchProjects } = useProjectStore();
 
   const [project, setProject] = useState<ProjectWithMeta | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -253,6 +255,8 @@ export default function FocusProjectPage() {
       toast.success("Настройки сохранены");
       setShowSettings(false);
       await fetchProjectData();
+      // Update global project list for FocusPage grouping changes
+      await fetchProjects();
     } catch {
       toast.error("Ошибка сохранения настроек");
     }
