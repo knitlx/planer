@@ -18,23 +18,24 @@ test.describe("Routines - habits and streaks", () => {
       await page.getByRole("button", { name: "Создать" }).click();
 
       // Check that habit was created and is visible
-      await expect(page.getByText(habitName)).toBeVisible();
+      const habitRow = page.getByTestId(/habit-card-/).filter({ hasText: habitName });
+      await expect(habitRow).toBeVisible();
 
       // Check initial streak is 0
-      await expect(page.getByText("0").first()).toBeVisible();
+      await expect(habitRow.getByTestId(/habit-streak-/)).toHaveText("0");
 
       // Toggle habit (mark as completed today)
-      const checkbox = page.locator("button").filter({ has: page.locator("svg") }).first();
+      const checkbox = habitRow.getByTestId(/habit-toggle-/);
       await checkbox.click();
 
       // Check streak became 1
-      await expect(page.getByText("1")).toBeVisible();
+      await expect(habitRow.getByTestId(/habit-streak-/)).toHaveText("1");
 
       // Toggle again (unmark as completed)
       await checkbox.click();
 
       // Check streak went back to 0
-      await expect(page.getByText("0").first()).toBeVisible();
+      await expect(habitRow.getByTestId(/habit-streak-/)).toHaveText("0");
 
       // Get habit ID for cleanup
       const habitsRes = await request.get("/api/habits");
