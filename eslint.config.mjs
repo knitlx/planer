@@ -1,7 +1,7 @@
 import next from "eslint-config-next";
 import coreWebVitals from "eslint-config-next/core-web-vitals";
 
-export default [
+const config = [
   {
     ignores: [
       "**/node_modules/**",
@@ -26,4 +26,6 @@ export default [
     },
   },
 ];
+
+export default config;
 

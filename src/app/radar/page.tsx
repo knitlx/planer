@@ -11,7 +11,7 @@ export default function RadarPage() {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
   const handleSelectProject = (projectId: string) => {
     router.push(`/focus/${projectId}`);
