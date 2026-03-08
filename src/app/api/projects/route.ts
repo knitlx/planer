@@ -72,9 +72,13 @@ export async function POST(request: Request) {
       "FINAL_STRETCH",
       "DONE",
     ] as const);
+    const type = parseOptionalEnumValue(payload.type, "type", [
+      "MANDATORY",
+      "NORMAL",
+    ] as const);
 
     const project = await prisma.project.create({
-      data: { name, description: description || null, weight, friction, deadline, status },
+      data: { name, description: description || null, weight, friction, deadline, status, type },
     });
     return NextResponse.json(project, { status: 201 });
   } catch (error: any) {

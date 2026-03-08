@@ -226,11 +226,14 @@ export function RoutinesClient() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="card p-4"
+                  data-testid={`habit-card-${habit.id}`}
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => toggleHabit(habit.id)}
+                        aria-label={`Отметить привычку ${habit.name}`}
+                        data-testid={`habit-toggle-${habit.id}`}
                         className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-colors ${
                           completedToday
                             ? "bg-green-500/20 border-green-500 text-green-400"
@@ -248,7 +251,12 @@ export function RoutinesClient() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <div className="text-lg font-bold text-accent">{habit.currentStreak}</div>
+                        <div
+                          className="text-lg font-bold text-accent"
+                          data-testid={`habit-streak-${habit.id}`}
+                        >
+                          {habit.currentStreak}
+                        </div>
                         <div className="text-[10px] text-text-muted">streak</div>
                       </div>
                       <div className="text-right">

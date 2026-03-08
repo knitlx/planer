@@ -26,6 +26,7 @@ model Project {
   tasks           Task[]
   ideas           Idea[]
   notificationLogs NotificationLog[]
+  reminderTriggerLogs ReminderTriggerLog[]
   habits          Habit[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -85,6 +86,7 @@ model User {
   telegramId Int       @unique
   name       String?
   projects   Project[]
+  reminders  Reminder[]
   createdAt  DateTime  @default(now())
 }
 
@@ -146,4 +148,161 @@ model HabitLog {
   completed Boolean  @default(false)
 
   @@unique([habitId, date])
+}
+
+model Reminder {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text      String
+  datetime  DateTime
+  recurring ReminderRecurring?
+  enabled   Boolean        @default(true)
+  lastSentAt DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  logs      ReminderLog[]
+
+  @@index([userId])
+  @@index([datetime])
+  @@index([enabled])
+}
+
+model ReminderLog {
+  id         String   @id @default(cuid())
+  reminderId String
+  reminder   Reminder @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+  sentAt     DateTime @default(now())
+  sentDate   String   // Format: YYYY-MM-DD
+
+  @@unique([reminderId, sentDate])
+  @@index([reminderId])
+  @@index([sentDate])
+}
+
+model ReminderTriggerConfig {
+  id              String               @id @default(cuid())
+  type            ReminderTriggerType
+  thresholdDays   Int?
+  cooldownHours   Int                  @default(24)
+  enabled         Boolean              @default(true)
+  lastEvaluatedAt DateTime?
+  logs            ReminderTriggerLog[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@unique([type])
+}
+
+model ReminderTriggerLog {
+  id          String               @id @default(cuid())
+  triggerId   String
+  trigger     ReminderTriggerConfig @relation(fields: [triggerId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  firedAt     DateTime             @default(now())
+  status      ReminderTriggerStatus
+  messageHash String?
+
+  @@index([triggerId, firedAt])
+  @@index([projectId])
+}
+
+model NewsSource {
+  id            String          @id @default(cuid())
+  name          String
+  type          NewsSourceType
+  url           String
+  enabled       Boolean         @default(true)
+  lastFetchedAt DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  items         NewsRaw[]
+}
+
+model NewsRaw {
+  id           String            @id @default(cuid())
+  sourceId     String
+  source       NewsSource        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  title        String
+  summary      String?
+  url          String
+  publishedAt  DateTime?
+  hash         String            @unique
+  llmInterest  Boolean?
+  llmScore     Int?
+  classifiedAt DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  digestEntries NewsDigestEntry[]
+
+  @@index([publishedAt])
+}
+
+model DigestWindowConfig {
+  id        String             @id @default(cuid())
+  slug      String             @unique
+  timeUtc   String
+  enabled   Boolean            @default(true)
+  maxItems  Int                @default(5)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  entries   NewsDigestEntry[]
+  deliveryLogs DigestDeliveryLog[]
+}
+
+model NewsDigestEntry {
+  id        String            @id @default(cuid())
+  rawId     String
+  raw       NewsRaw           @relation(fields: [rawId], references: [id], onDelete: Cascade)
+  windowId  String
+  window    DigestWindowConfig @relation(fields: [windowId], references: [id], onDelete: Cascade)
+  status    DigestEntryStatus  @default(QUEUED)
+  position  Int?
+  sentAt    DateTime?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([windowId, status])
+  @@index([status])
+}
+
+model DigestDeliveryLog {
+  id          String             @id @default(cuid())
+  windowId    String
+  window      DigestWindowConfig @relation(fields: [windowId], references: [id], onDelete: Cascade)
+  deliveredAt DateTime           @default(now())
+  itemCount   Int                @default(0)
+  messageId   String?
+
+  @@index([windowId, deliveredAt])
+}
+
+enum ReminderRecurring {
+  DAILY
+  WEEKLY
+}
+
+enum ReminderTriggerType {
+  MANDATORY_STALE
+  MANDATORY_IGNORED
+  MANDATORY_NO_ACTIVE_TASKS
+}
+
+enum ReminderTriggerStatus {
+  SENT
+  ERROR
+  SKIPPED
+}
+
+enum NewsSourceType {
+  RSS
+  API
+}
+
+enum DigestEntryStatus {
+  QUEUED
+  SENT
+  SKIPPED
 }

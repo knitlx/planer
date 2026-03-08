@@ -14,6 +14,7 @@ import {
   Menu,
   Timer,
   Repeat,
+  Bell,
 } from "lucide-react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { AppModal } from "@/components/AppModal";
@@ -79,6 +80,7 @@ export function QuantumSidebar() {
     { href: "/projects", label: "Проекты", icon: Folder },
     { href: "/ideas", label: "Идеи", icon: Lightbulb },
     { href: "/tasks", label: "Задачи", icon: CheckSquare },
+    { href: "/reminders", label: "Напоминания", icon: Bell },
     { href: "/routines", label: "Привычки", icon: Repeat },
     { href: "/archive", label: "Архив", icon: Archive },
   ];

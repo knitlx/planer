@@ -69,13 +69,16 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const body = await request.json();
-    const payload = assertRecord(body);
-    
-    let date = payload.date;
-    if (typeof date !== "string" || !date) {
-      date = getTodayDate();
+    let payload: Record<string, unknown> = {};
+    try {
+      const body = await request.json();
+      payload = assertRecord(body);
+    } catch {
+      payload = {};
     }
+    
+    const dateValue = typeof payload.date === "string" ? payload.date : "";
+    const date = dateValue.trim() || getTodayDate();
 
     const habit = await prisma.habit.findUnique({
       where: { id },
