@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bell, Plus, Settings, Check, AlertTriangle } from "lucide-react";
+import { Bell, Plus, Settings, Check, AlertTriangle, SlidersHorizontal, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReminderList } from "@/components/reminders/ReminderList";
-import { ReminderForm, ReminderFormData } from "@/components/reminders/ReminderForm";
+import { ReminderForm, type ReminderFormData } from "@/components/reminders/ReminderForm";
 import { AppModal } from "@/components/AppModal";
+import { TriggerSettings } from "@/components/reminders/TriggerSettings";
+import { NewsDigestSettings } from "@/components/reminders/NewsDigestSettings";
 import { toast } from "sonner";
 import type { Reminder, User } from "@prisma/client";
 
@@ -21,6 +23,8 @@ export default function RemindersPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ReminderWithUser | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showTriggerSettingsModal, setShowTriggerSettingsModal] = useState(false);
+  const [showDigestSettingsModal, setShowDigestSettingsModal] = useState(false);
   const [settings, setSettings] = useState<{
     user?: ReminderWithUser["user"];
     botTokenConfigured: boolean;
@@ -220,6 +224,47 @@ export default function RemindersPage() {
           onCreate={() => setShowAddModal(true)}
         />
 
+        {/* Smart reminders configuration cards */}
+        <section className="grid gap-4 md:grid-cols-2">
+          <div className="card p-5 flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-accent/10">
+                <SlidersHorizontal className="w-5 h-5 text-accent" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-text-primary">Обязательные триггеры</h2>
+                <p className="text-sm text-text-secondary">
+                  Управляйте условиями Mandatory-проектов: пороги, кулдауны и включение режимов.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowTriggerSettingsModal(true)}>
+                Настройки триггеров
+              </Button>
+            </div>
+          </div>
+
+          <div className="card p-5 flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Newspaper className="w-5 h-5 text-blue-500" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-text-primary">AI дайджесты</h2>
+                <p className="text-sm text-text-secondary">
+                  Настройте источники, окна доставки и следите за последними отправками новостей.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowDigestSettingsModal(true)}>
+                Настройки дайджеста
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Add Reminder Modal */}
         <AppModal
           open={showAddModal}
@@ -315,6 +360,26 @@ export default function RemindersPage() {
               Не удалось загрузить настройки.
             </div>
           )}
+        </AppModal>
+
+        <AppModal
+          open={showTriggerSettingsModal}
+          onClose={() => setShowTriggerSettingsModal(false)}
+          title="Mandatory triggers"
+          description="Тонкая настройка автоматических напоминаний"
+          maxWidthClassName="max-w-3xl"
+        >
+          <TriggerSettings />
+        </AppModal>
+
+        <AppModal
+          open={showDigestSettingsModal}
+          onClose={() => setShowDigestSettingsModal(false)}
+          title="AI дайджесты"
+          description="Источники новостей и окна доставки"
+          maxWidthClassName="max-w-4xl"
+        >
+          <NewsDigestSettings />
         </AppModal>
       </motion.div>
     </div>

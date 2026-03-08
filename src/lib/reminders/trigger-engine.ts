@@ -1,233 +1,242 @@
 import { prisma } from "@/lib/prisma";
-import type {
-  Project,
-  ReminderTriggerConfig,
-  ReminderTriggerLog,
+import type { Prisma } from "@prisma/client";
+import {
+  ReminderTriggerStatus,
   ReminderTriggerType,
-  Task,
+  type Project,
+  type ReminderTriggerConfig,
+  type ReminderTriggerLog,
+  type Task,
+  type TaskStatus,
 } from "@prisma/client";
 
-type ProjectWithTasks = Project & { tasks: Task[] };
-type TriggerConfigShape = Pick<
-  ReminderTriggerConfig,
-  "id" | "type" | "thresholdDays" | "cooldownHours"
->;
+const HOURS_IN_MS = 60 * 60 * 1000;
+const DAYS_IN_MS = 24 * HOURS_IN_MS;
+const ACTIVE_TASK_STATUSES: ReadonlySet<TaskStatus> = new Set([
+  "TODO",
+  "IN_PROGRESS",
+]);
+const DEFAULT_STALE_DAYS = 2;
+const DEFAULT_IGNORED_DAYS = 1;
 
-const MS_IN_HOUR = 1000 * 60 * 60;
-const MS_IN_DAY = MS_IN_HOUR * 24;
+export interface MandatoryProjectSnapshot {
+  id: string;
+  name: string;
+  lastActive: Date;
+  updatedAt: Date;
+  tasks: Pick<Task, "status">[];
+}
 
-export interface TriggerMatch {
-  triggerId: string;
-  triggerType: ReminderTriggerType;
-  projectId: string;
-  projectName: string;
+export interface MandatoryTriggerMatch {
+  project: MandatoryProjectSnapshot;
   reason: string;
 }
 
-export function evaluateMandatoryStale(
-  projects: ProjectWithTasks[],
-  config: TriggerConfigShape,
-  now = new Date(),
-): TriggerMatch[] {
-  const threshold = config.thresholdDays ?? 2;
-
-  return projects
-    .filter((project) => project.type === "MANDATORY")
-    .filter((project) => {
-      if (!project.lastActive) return false;
-      const diffDays = daysBetween(now, project.lastActive);
-      return diffDays >= threshold;
-    })
-    .map((project) => ({
-      triggerId: config.id,
-      triggerType: config.type,
-      projectId: project.id,
-      projectName: project.name,
-      reason: `Последняя активность ${Math.floor(
-        daysBetween(now, project.lastActive!),
-      )} дн. назад`,
-    }));
-}
-
-export function evaluateMandatoryIgnored(
-  mandatoryProjects: ProjectWithTasks[],
-  otherProjects: ProjectWithTasks[],
-  config: TriggerConfigShape,
-  now = new Date(),
-): TriggerMatch[] {
-  const threshold = config.thresholdDays ?? 1;
-  const activeOthers = otherProjects.filter((project) => {
-    if (!project.lastActive) return false;
-    const diffHours = hoursBetween(now, project.lastActive);
-    return diffHours <= 24;
-  });
-
-  if (activeOthers.length === 0) {
-    return [];
-  }
-
-  return mandatoryProjects
-    .filter((project) => {
-      if (!project.lastActive) return false;
-      const diffDays = daysBetween(now, project.lastActive);
-      return diffDays >= threshold;
-    })
-    .map((project) => ({
-      triggerId: config.id,
-      triggerType: config.type,
-      projectId: project.id,
-      projectName: project.name,
-      reason: `Активность была только в других проектах (${activeOthers
-        .slice(0, 1)
-        .map((p) => p.name)
-        .join(", ")})`,
-    }));
-}
-
-export function evaluateMandatoryNoActiveTasks(
-  projects: ProjectWithTasks[],
-  config: TriggerConfigShape,
-): TriggerMatch[] {
-  return projects
-    .filter((project) => project.type === "MANDATORY")
-    .filter((project) => {
-      const tasks = project.tasks ?? [];
-      return !tasks.some((task) =>
-        ["TODO", "IN_PROGRESS"].includes(task.status),
-      );
-    })
-    .map((project) => ({
-      triggerId: config.id,
-      triggerType: config.type,
-      projectId: project.id,
-      projectName: project.name,
-      reason: "Нет активных задач в очереди",
-    }));
+export interface MandatoryTriggerEvent extends MandatoryTriggerMatch {
+  trigger: ReminderTriggerConfig;
 }
 
 export class MandatoryTriggerEngine {
-  constructor(private readonly db = prisma) {}
+  constructor(private readonly client = prisma) {}
 
-  async evaluate(now = new Date()): Promise<TriggerMatch[]> {
-    const configs = await this.db.reminderTriggerConfig.findMany({
+  async evaluate(now = new Date()): Promise<MandatoryTriggerEvent[]> {
+    const configs = await this.client.reminderTriggerConfig.findMany({
       where: { enabled: true },
+      orderBy: { type: "asc" },
     });
 
     if (configs.length === 0) {
       return [];
     }
 
-    const projects = (await this.db.project.findMany({
-      where: { status: { not: "DONE" } },
-      include: { tasks: true },
-    })) as ProjectWithTasks[];
-
-    const mandatoryProjects = projects.filter(
-      (project) => project.type === "MANDATORY",
-    );
-    const otherProjects = projects.filter(
-      (project) => project.type !== "MANDATORY",
-    );
+    const [mandatoryProjects, normalProjects] = await Promise.all([
+      this.client.project.findMany({
+        where: { type: "MANDATORY", status: { not: "DONE" } },
+        include: {
+          tasks: {
+            select: { status: true },
+          },
+        },
+      }),
+      this.client.project.findMany({
+        where: { type: { not: "MANDATORY" }, status: { not: "DONE" } },
+        select: { id: true, lastActive: true, updatedAt: true },
+      }),
+    ]);
 
     if (mandatoryProjects.length === 0) {
       return [];
     }
 
-    const allMatches: TriggerMatch[] = [];
+    const snapshots = mandatoryProjects.map(toSnapshot);
+    const normalSnapshots = normalProjects.map((project) => ({
+      id: project.id,
+      lastActive: project.lastActive,
+      updatedAt: project.updatedAt,
+    }));
 
-    for (const config of configs) {
-      const matches = await this.evaluateConfig(
-        config,
-        mandatoryProjects,
-        otherProjects,
-        now,
-      );
-
-      if (matches.length === 0) {
-        await this.updateEvaluationTimestamp(config.id, now);
-        continue;
-      }
-
-      const eligible = await this.filterByCooldown(config, matches, now);
-      if (eligible.length > 0) {
-        allMatches.push(...eligible);
-      }
-      await this.updateEvaluationTimestamp(config.id, now);
-    }
-
-    return allMatches;
-  }
-
-  private async evaluateConfig(
-    config: ReminderTriggerConfig,
-    mandatoryProjects: ProjectWithTasks[],
-    otherProjects: ProjectWithTasks[],
-    now: Date,
-  ): Promise<TriggerMatch[]> {
-    switch (config.type) {
-      case "MANDATORY_STALE":
-        return evaluateMandatoryStale(mandatoryProjects, config, now);
-      case "MANDATORY_IGNORED":
-        return evaluateMandatoryIgnored(
-          mandatoryProjects,
-          otherProjects,
-          config,
-          now,
-        );
-      case "MANDATORY_NO_ACTIVE_TASKS":
-        return evaluateMandatoryNoActiveTasks(mandatoryProjects, config);
-      default:
-        return [];
-    }
-  }
-
-  private async filterByCooldown(
-    config: ReminderTriggerConfig,
-    matches: TriggerMatch[],
-    now: Date,
-  ): Promise<TriggerMatch[]> {
-    const cutoff = new Date(
-      now.getTime() - config.cooldownHours * MS_IN_HOUR,
-    );
-    const projectIds = matches.map((match) => match.projectId);
-
-    if (projectIds.length === 0) {
-      return matches;
-    }
-
-    const recentLogs = await this.db.reminderTriggerLog.findMany({
+    const cooldownWindowStart = this.computeCooldownWindow(configs, now);
+    const recentLogs = await this.client.reminderTriggerLog.findMany({
       where: {
-        triggerId: config.id,
-        projectId: { in: projectIds },
-        firedAt: { gte: cutoff },
+        triggerId: { in: configs.map((cfg) => cfg.id) },
+        firedAt: cooldownWindowStart ? { gte: cooldownWindowStart } : undefined,
       },
-      select: { projectId: true },
+      select: { triggerId: true, projectId: true, firedAt: true },
     });
 
-    if (recentLogs.length === 0) {
-      return matches;
+    const latestLogByKey = new Map<string, ReminderTriggerLog["firedAt"]>();
+    for (const log of recentLogs) {
+      const key = this.logKey(log.triggerId, log.projectId);
+      const current = latestLogByKey.get(key);
+      if (!current || current < log.firedAt) {
+        latestLogByKey.set(key, log.firedAt);
+      }
     }
 
-    const suppressed = new Set(
-      recentLogs.map((log: Pick<ReminderTriggerLog, "projectId">) => log.projectId),
-    );
-    return matches.filter((match) => !suppressed.has(match.projectId));
-  }
+    const events: MandatoryTriggerEvent[] = [];
+    for (const config of configs) {
+      const matches = evaluateConfig(config, snapshots, normalSnapshots, now);
+      for (const match of matches) {
+        const key = this.logKey(config.id, match.project.id);
+        const lastFired = latestLogByKey.get(key);
+        if (
+          lastFired &&
+          now.getTime() - lastFired.getTime() < config.cooldownHours * HOURS_IN_MS
+        ) {
+          continue;
+        }
+        events.push({ trigger: config, ...match });
+      }
+    }
 
-  private async updateEvaluationTimestamp(id: string, now: Date) {
-    await this.db.reminderTriggerConfig.update({
-      where: { id },
+    await this.client.reminderTriggerConfig.updateMany({
+      where: { id: { in: configs.map((cfg) => cfg.id) } },
       data: { lastEvaluatedAt: now },
     });
+
+    return events;
+  }
+
+  async recordLogs(
+    events: MandatoryTriggerEvent[],
+    status: ReminderTriggerStatus,
+    messageHash?: string,
+  ) {
+    if (events.length === 0) return;
+
+    await this.client.reminderTriggerLog.createMany({
+      data: events.map((event) => ({
+        triggerId: event.trigger.id,
+        projectId: event.project.id,
+        status,
+        messageHash,
+      })),
+    });
+  }
+
+  private computeCooldownWindow(
+    configs: ReminderTriggerConfig[],
+    now: Date,
+  ): Date | undefined {
+    if (configs.length === 0) return undefined;
+    const maxHours = Math.max(...configs.map((cfg) => cfg.cooldownHours));
+    return new Date(now.getTime() - maxHours * HOURS_IN_MS);
+  }
+
+  private logKey(triggerId: string, projectId?: string | null) {
+    return `${triggerId}:${projectId ?? "none"}`;
   }
 }
 
-function daysBetween(now: Date, other: Date | string): number {
-  const otherDate = new Date(other);
-  return (now.getTime() - otherDate.getTime()) / MS_IN_DAY;
+function toSnapshot(project: Project & { tasks: Pick<Task, "status">[] }): MandatoryProjectSnapshot {
+  return {
+    id: project.id,
+    name: project.name,
+    lastActive: project.lastActive,
+    updatedAt: project.updatedAt,
+    tasks: project.tasks,
+  };
 }
 
-function hoursBetween(now: Date, other: Date | string): number {
-  const otherDate = new Date(other);
-  return (now.getTime() - otherDate.getTime()) / MS_IN_HOUR;
+function evaluateConfig(
+  config: ReminderTriggerConfig,
+  projects: MandatoryProjectSnapshot[],
+  normalProjects: Pick<Project, "id" | "lastActive" | "updatedAt">[],
+  now: Date,
+): MandatoryTriggerMatch[] {
+  switch (config.type) {
+    case ReminderTriggerType.MANDATORY_STALE:
+      return evaluateMandatoryStale(
+        projects,
+        config.thresholdDays ?? DEFAULT_STALE_DAYS,
+        now,
+      );
+    case ReminderTriggerType.MANDATORY_NO_ACTIVE_TASKS:
+      return evaluateMandatoryNoActiveTasks(projects);
+    case ReminderTriggerType.MANDATORY_IGNORED:
+      return evaluateMandatoryIgnored(
+        projects,
+        normalProjects,
+        config.thresholdDays ?? DEFAULT_IGNORED_DAYS,
+        now,
+      );
+    default:
+      return [];
+  }
+}
+
+export function evaluateMandatoryStale(
+  projects: MandatoryProjectSnapshot[],
+  thresholdDays = DEFAULT_STALE_DAYS,
+  now = new Date(),
+): MandatoryTriggerMatch[] {
+  const thresholdMs = thresholdDays * DAYS_IN_MS;
+  return projects
+    .filter((project) => now.getTime() - project.lastActive.getTime() >= thresholdMs)
+    .map((project) => ({
+      project,
+      reason: `Проект простаивает уже ${daysBetween(project.lastActive, now)} дн.`,
+    }));
+}
+
+export function evaluateMandatoryNoActiveTasks(
+  projects: MandatoryProjectSnapshot[],
+): MandatoryTriggerMatch[] {
+  return projects
+    .filter(
+      (project) =>
+        project.tasks.length === 0 ||
+        project.tasks.every((task) => !ACTIVE_TASK_STATUSES.has(task.status)),
+    )
+    .map((project) => ({
+      project,
+      reason: "Нет активных задач",
+    }));
+}
+
+export function evaluateMandatoryIgnored(
+  mandatoryProjects: MandatoryProjectSnapshot[],
+  otherProjects: Pick<Project, "id" | "lastActive" | "updatedAt">[],
+  thresholdDays = DEFAULT_IGNORED_DAYS,
+  now = new Date(),
+): MandatoryTriggerMatch[] {
+  const thresholdMs = thresholdDays * DAYS_IN_MS;
+  const hasRecentNormalWork = otherProjects.some(
+    (project) => now.getTime() - new Date(project.lastActive).getTime() < thresholdMs,
+  );
+
+  if (!hasRecentNormalWork) {
+    return [];
+  }
+
+  return mandatoryProjects
+    .filter((project) => now.getTime() - project.lastActive.getTime() >= thresholdMs)
+    .map((project) => ({
+      project,
+      reason: "За последние дни ты работал только над обычными проектами",
+    }));
+}
+
+function daysBetween(start: Date, end: Date): number {
+  return Math.max(1, Math.floor((end.getTime() - start.getTime()) / DAYS_IN_MS));
 }

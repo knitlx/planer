@@ -344,6 +344,7 @@ export function RoutinesClient() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="relative"
+                  data-testid={`habit-card-${habit.id}`}
                 >
                   {showCalendars[habit.id] && (
                     <motion.div
@@ -375,6 +376,8 @@ export function RoutinesClient() {
                         </button>
                         <button
                           onClick={() => toggleHabit(habit.id)}
+                          aria-label={`Отметить привычку ${habit.name}`}
+                          data-testid={`habit-toggle-${habit.id}`}
                           className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-colors ${
                             completedToday
                               ? "bg-green-500/20 border-green-500 text-green-400"
@@ -431,7 +434,10 @@ export function RoutinesClient() {
                       </div>
                       <div className="flex items-center gap-3 ml-auto">
                         <div className="flex items-center gap-1">
-                          <span className="text-lg font-bold text-accent leading-none">
+                          <span
+                            className="text-lg font-bold text-accent leading-none"
+                            data-testid={`habit-streak-${habit.id}`}
+                          >
                             {habit.currentStreak}
                           </span>
                           <span className="text-xs uppercase tracking-wide text-text-muted">серия</span>
