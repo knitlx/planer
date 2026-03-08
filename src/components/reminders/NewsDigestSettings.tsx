@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { CalendarClock, RefreshCcw } from "lucide-react";
@@ -48,11 +48,7 @@ export function NewsDigestSettings() {
     [windows, selectedWindowId],
   );
 
-  useEffect(() => {
-    void refreshAll();
-  }, []);
-
-  async function refreshAll() {
+  const refreshAll = useCallback(async () => {
     setLoading(true);
     try {
       const [sourcesRes, windowsRes, digestsRes] = await Promise.all([
@@ -79,7 +75,11 @@ export function NewsDigestSettings() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedWindowId]);
+
+  useEffect(() => {
+    void refreshAll();
+  }, [refreshAll]);
 
   async function toggleSource(id: string, enabled: boolean) {
     try {

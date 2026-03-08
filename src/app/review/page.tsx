@@ -10,7 +10,7 @@ export default function ReviewPage() {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
   if (isLoading)
     return <div className="p-8 text-text-secondary">Загрузка...</div>;

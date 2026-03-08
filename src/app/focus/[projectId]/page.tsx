@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -31,17 +31,8 @@ export default function FocusProjectPage() {
   const [importance, setImportance] = useState(75);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
 
-  useEffect(() => {
+  const fetchProjectData = useCallback(async () => {
     if (!projectId) return;
-    fetchProjectData();
-  }, [projectId]);
-
-  useEffect(() => {
-    if (searchParams.get("newTask") === "1") setShowAddTask(true);
-    if (searchParams.get("settings") === "1") setShowSettings(true);
-  }, [searchParams]);
-
-  const fetchProjectData = async () => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/projects/${projectId}`);
@@ -57,7 +48,16 @@ export default function FocusProjectPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    void fetchProjectData();
+  }, [fetchProjectData]);
+
+  useEffect(() => {
+    if (searchParams.get("newTask") === "1") setShowAddTask(true);
+    if (searchParams.get("settings") === "1") setShowSettings(true);
+  }, [searchParams]);
 
   const taskStats = useMemo(() => {
     const todo = tasks.filter((task) => task.status === TASK_STATUS.TODO).length;
