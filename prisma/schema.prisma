@@ -181,11 +181,6 @@ model ReminderLog {
   @@index([sentDate])
 }
 
-enum ReminderRecurring {
-  DAILY
-  WEEKLY
-}
-
 model ReminderTriggerConfig {
   id              String               @id @default(cuid())
   type            ReminderTriggerType
@@ -282,6 +277,11 @@ model DigestDeliveryLog {
   messageId   String?
 
   @@index([windowId, deliveredAt])
+}
+
+enum ReminderRecurring {
+  DAILY
+  WEEKLY
 }
 
 enum ReminderTriggerType {

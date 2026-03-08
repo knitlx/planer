@@ -28,7 +28,7 @@ test.describe("Project types - mandatory and normal", () => {
       await page.goto("/focus");
 
       // Check mandatory project is visible
-      await expect(page.getByText(mandatoryProjectName)).toBeVisible();
+      await expect(page.getByRole("heading", { name: mandatoryProjectName })).toBeVisible();
 
       // Check mandatory section is visible
       await expect(page.getByText("Обязательные")).toBeVisible();
@@ -37,10 +37,11 @@ test.describe("Project types - mandatory and normal", () => {
       await expect(page.getByText(`Показать остальные проекты`)).toBeVisible();
 
       // Mark mandatory project as completed today
-      await page.getByRole("button", { name: "Отметить сегодня" }).click();
+      const mandatoryCard = page.getByRole("button", { name: new RegExp(mandatoryProjectName) });
+      await mandatoryCard.getByRole("button", { name: "Отметить сегодня" }).click();
 
       // Wait for update and check that normal projects are now visible
-      await expect(page.getByText(normalProjectName)).toBeVisible();
+      await expect(page.getByRole("heading", { name: normalProjectName })).toBeVisible();
 
       // Check that the unlock section is visible
       await expect(page.getByText("Остальные проекты")).toBeVisible();

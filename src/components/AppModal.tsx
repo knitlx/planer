@@ -7,6 +7,7 @@ interface AppModalProps {
   open: boolean;
   title: string;
   description?: string;
+  subtitle?: string;
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
@@ -18,6 +19,7 @@ export function AppModal({
   open,
   title,
   description,
+  subtitle,
   onClose,
   children,
   footer,
@@ -108,6 +110,7 @@ export function AppModal({
           <div>
             <h3 id={titleId} className="text-2xl font-semibold tracking-tight font-[var(--font-unbounded)]">{title}</h3>
             {description && <p id={descriptionId} className="text-qf-text-secondary mt-2">{description}</p>}
+            {subtitle && <p className="text-sm text-qf-text-muted mt-1">{subtitle}</p>}
           </div>
           <button
             onClick={onClose}

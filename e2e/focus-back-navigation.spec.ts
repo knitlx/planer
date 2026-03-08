@@ -15,10 +15,8 @@ test.describe("Focus project back navigation", () => {
       projectId = project.id;
 
       await page.goto("/projects");
-      const projectHeading = page.getByRole("heading", { name: projectName });
-      await expect(projectHeading).toBeVisible();
-
-      const projectCard = projectHeading.locator("xpath=ancestor::button[1]");
+      const projectCard = page.getByRole("button", { name: new RegExp(projectName) });
+      await expect(projectCard).toBeVisible();
       await projectCard.focus();
       await page.keyboard.press("Enter");
 
