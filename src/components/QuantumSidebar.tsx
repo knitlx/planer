@@ -16,6 +16,7 @@ import {
   Timer,
   Repeat,
   Bell,
+  LogOut,
 } from "lucide-react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { AppModal } from "@/components/AppModal";
@@ -24,6 +25,12 @@ import { Button } from "@/components/ui/button";
 export function QuantumSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+
+  // Don't show sidebar on login page
+  if (pathname === "/login") {
+    return null;
+  }
+
   const { projects, fetchProjects, isLoading, error } = useProjectStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickCollectOpen, setQuickCollectOpen] = useState(false);
@@ -74,6 +81,18 @@ export function QuantumSidebar() {
       return;
     }
     router.push("/?quickFocus=1");
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (response.ok) {
+        router.push("/login");
+        router.refresh();
+      }
+    } catch {
+      // Silent fail
+    }
   };
 
   const navItems = [
@@ -217,7 +236,7 @@ export function QuantumSidebar() {
         />
       </AppModal>
 
-      <aside className="hidden lg:flex w-64 h-screen flex-col fixed left-0 top-0 z-10 bg-[#0A0908] border-r border-qf-border-secondary pt-8 pb-4 px-4">
+      <aside className="hidden lg:flex w-64 h-screen flex-col fixed left-0 top-0 z-10 bg-[#0A0908] border-r border-qf-border-secondary pt-8 pb-4 px-4 overflow-hidden">
         <div className="px-3 mb-12">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
             <div className="w-9 h-9 rounded-lg bg-[#ffc300] border border-[#ffc300]/70 flex items-center justify-center">
@@ -228,7 +247,7 @@ export function QuantumSidebar() {
           <p className="text-[11px] text-qf-text-muted mt-2 font-medium tracking-wide px-0.5">Система управления</p>
         </div>
 
-        <nav className="flex-1 flex flex-col">
+        <nav className="flex-1 flex flex-col overflow-y-auto min-h-0">
           <div className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -283,13 +302,21 @@ export function QuantumSidebar() {
             )}
           </div>
 
-          <div className="mt-auto pt-8 flex justify-center">
+          <div className="mt-auto pt-8 flex flex-col gap-2">
             <button
               onClick={handleQuickFocus}
               className="focus-button w-auto px-3.5 py-2 flex items-center justify-center gap-2 rounded-xl text-sm tracking-tight"
             >
               <Timer className="w-4 h-4 text-[#0A0908]" strokeWidth={2.8} />
               Старт фокуса
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-auto px-3.5 py-2 flex items-center justify-center gap-2 rounded-xl text-sm tracking-tight text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5 transition-colors"
+              aria-label="Выйти"
+            >
+              <LogOut className="w-4 h-4" strokeWidth={2} />
+              Выйти
             </button>
           </div>
         </nav>
