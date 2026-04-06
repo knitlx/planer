@@ -9,6 +9,7 @@ import {
   Archive,
   CheckSquare,
   Lightbulb,
+  Bot,
   Plus,
   Loader2,
   Menu,
@@ -77,11 +78,11 @@ export function QuantumSidebar() {
 
   const navItems = [
     { href: "/", label: "Главная", icon: Home },
+    { href: "/agent", label: "AI Агент", icon: Bot },
     { href: "/projects", label: "Проекты", icon: Folder },
     { href: "/reminders", label: "Напоминания", icon: Bell },
     { href: "/ideas", label: "Идеи", icon: Lightbulb },
     { href: "/tasks", label: "Задачи", icon: CheckSquare },
-    { href: "/reminders", label: "Напоминания", icon: Bell },
     { href: "/routines", label: "Привычки", icon: Repeat },
     { href: "/archive", label: "Архив", icon: Archive },
   ];

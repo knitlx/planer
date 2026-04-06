@@ -56,3 +56,7 @@
 1. Единая нормализация API error contract во всех route handlers.
 2. Дополнительный metadata/SEO-polish по страницам.
 3. Только после этого — решение о более крупном server/client архитектурном рефакторе.
+
+## Agent-oriented docs
+- Точка входа для AI-агентов: `docs/agents/README.md`
+- Внутри — маршрутизация по доменам (API/UI/AI/Data/Workflows) и ссылки на целевые файлы.

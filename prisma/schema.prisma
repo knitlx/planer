@@ -150,6 +150,15 @@ model HabitLog {
   @@unique([habitId, date])
 }
 
+model AgentChatMessage {
+  id        String   @id @default(cuid())
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 model Reminder {
   id        String         @id @default(cuid())
   userId    String

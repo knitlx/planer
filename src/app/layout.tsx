@@ -63,7 +63,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geologica.variable} ${unbounded.variable} ${jetBrainsMono.variable}`}
     >
-      <body className="font-sans">
+      <body suppressHydrationWarning className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <div className="quantum-bg" aria-hidden />
           <QuantumSidebar />

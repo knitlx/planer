@@ -35,16 +35,17 @@ export default function FocusProjectPage() {
     if (!projectId) return;
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/projects/${projectId}`);
+      const response = await fetch(`/api/projects/${projectId}`, { cache: "no-store" });
       if (!response.ok) {
-        throw new Error("Не удалось загрузить проект");
+        const payload = (await response.json().catch(() => null)) as unknown;
+        throw new Error(getApiErrorMessage(payload) || "Не удалось загрузить проект");
       }
       const data = (await response.json()) as ProjectWithMeta;
       setProject(data);
       setTasks(data.tasks || []);
       setImportance((data.weight || 5) * 10);
-    } catch {
-      toast.error("Ошибка загрузки проекта");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ошибка загрузки проекта");
     } finally {
       setIsLoading(false);
     }
@@ -83,28 +84,32 @@ export default function FocusProjectPage() {
 
     try {
       setIsCreatingTask(true);
+      const nextOrder = tasks.length;
       const response = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: newTaskTitle,
-          contextSummary: newTaskNote,
+          title: newTaskTitle.trim(),
+          contextSummary: newTaskNote.trim(),
           projectId,
           type: "ACTION",
+          order: nextOrder,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Не удалось добавить задачу");
+        const payload = (await response.json().catch(() => null)) as unknown;
+        throw new Error(getApiErrorMessage(payload) || "Не удалось добавить задачу");
       }
 
+      const createdTask = (await response.json()) as Task;
+      setTasks((prev) => [...prev, createdTask]);
       toast.success("Задача добавлена");
       setNewTaskTitle("");
       setNewTaskNote("");
       setShowAddTask(false);
-      await fetchProjectData();
-    } catch {
-      toast.error("Ошибка добавления задачи");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ошибка добавления задачи");
     } finally {
       setIsCreatingTask(false);
     }
