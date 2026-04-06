@@ -89,7 +89,9 @@ export async function POST(
       return apiError(404, "NOT_FOUND", "Привычка не найдена");
     }
 
-    const existingLog = habit.logs.find((log) => log.date === date);
+    const existingLog = habit.logs.find(
+      (log: { id: string; date: string; completed: boolean }) => log.date === date,
+    );
     const newCompletedState = !existingLog?.completed;
 
     if (existingLog) {

@@ -12,15 +12,16 @@ import {
 } from "@/lib/api-validation";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const reminder = await prisma.reminder.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         user: {
           select: {
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const payload = assertRecord(body);
 
@@ -63,7 +65,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (enabled !== undefined) updateData.enabled = enabled;
 
     const reminder = await prisma.reminder.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         user: {
@@ -94,8 +96,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     await prisma.reminder.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });

@@ -76,7 +76,7 @@ export async function PUT(
       return apiError(404, "NOT_FOUND", "Проект не найден");
     }
 
-    const task = await prisma.$transaction(async (tx) => {
+    const task = await prisma.$transaction(async (tx: any) => {
       const task = await tx.task.create({
         data: {
           projectId: targetProjectId,
@@ -103,7 +103,7 @@ export async function PUT(
   if (!projectName) return validationError("Поле projectName обязательно");
   const projectWeight = weight ?? 5;
 
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: any) => {
     const project = await tx.project.create({
       data: { name: projectName, weight: projectWeight },
     });

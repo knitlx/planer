@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { IdeaStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   assertRecord,
@@ -22,7 +21,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const statusParam = searchParams.get("status");
 
-  let status: IdeaStatus | undefined;
+  let status: (typeof IDEA_STATUSES)[number] | undefined;
   if (statusParam && statusParam !== "ALL") {
     try {
       status = parseEnumValue(statusParam, "status", IDEA_STATUSES);
