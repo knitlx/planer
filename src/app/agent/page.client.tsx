@@ -590,7 +590,7 @@ export default function AgentPageClient() {
             {message.role === "assistant" ? (
               <MarkdownMessage content={message.content} />
             ) : (
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              <p className="whitespace-pre-wrap break-words">{message.content}</p>
             )}
           </div>
         ))}
@@ -630,11 +630,12 @@ export default function AgentPageClient() {
         )}
 
         <div className="flex flex-col md:flex-row gap-2 md:items-center">
-          <Input
+          <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Например: создай проект 'Запуск MVP' и добавь в него 3 задачи"
-            className="flex-1 bg-qf-bg-secondary border-qf-border-primary"
+            className="flex-1 min-h-[44px] max-h-[120px] rounded-md border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-y"
+            rows={1}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();

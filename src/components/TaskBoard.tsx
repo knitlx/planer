@@ -633,7 +633,7 @@ function TaskCard({
             {task.title}
           </p>
           {task.contextSummary ? (
-            <p className="mt-1 text-xs text-qf-text-secondary whitespace-pre-wrap">{task.contextSummary}</p>
+            <p className="mt-1 text-xs text-qf-text-secondary whitespace-pre-wrap break-words">{task.contextSummary}</p>
           ) : null}
           {isTimerEditing ? (
             <div className="mt-2">
