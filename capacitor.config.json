@@ -2,7 +2,6 @@
   "appId": "space.nochaos.planer",
   "appName": "Planer",
   "webDir": ".next",
-  "bundledWebRuntime": false,
   "server": {
     "url": "https://planer.nochaos.space",
     "cleartext": false
