@@ -22,6 +22,9 @@
     "e2e:install": "PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -39,14 +42,12 @@
     "dotenv": "^17.3.1",
     "framer-motion": "^12.34.3",
     "iron-session": "^8.0.4",
-    "@capacitor/cli": "^7.2.0",
-    "@capacitor/core": "^7.2.0",
-    "@capacitor/android": "^7.2.0",
     "lucide-react": "^0.575.0",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
     "next-themes": "^0.4.6",
     "prisma": "^7.4.1",
+    "rate-limiter-flexible": "^11.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hotkeys-hook": "^5.2.4",
@@ -57,8 +58,8 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
     "@capacitor/cli": "^7.2.0",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",

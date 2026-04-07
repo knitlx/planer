@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getIronSession, SessionOptions } from "iron-session";
 import { SessionData } from "./lib/auth";
+import { rateLimitMiddleware } from "./lib/rate-limit";
 
 const sessionOptions: SessionOptions = {
   password: process.env.SESSION_SECRET!,
@@ -12,6 +13,14 @@ const sessionOptions: SessionOptions = {
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7,
   },
+};
+
+// CORS headers for API routes
+const corsHeaders = {
+  "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_APP_URL || "https://planer.nochaos.space",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Max-Age": "86400",
 };
 
 // Public paths that don't require authentication
@@ -36,9 +45,32 @@ function isPublicPath(pathname: string): boolean {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Handle CORS preflight requests
+  if (request.method === "OPTIONS") {
+    return new NextResponse(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  // Apply rate limiting for API routes
+  if (pathname.startsWith("/api/")) {
+    const rateLimitResponse = await rateLimitMiddleware(request);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+  }
+
   // Allow public paths
   if (isPublicPath(pathname)) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    // Add CORS headers to public API responses
+    if (pathname.startsWith("/api/")) {
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+    }
+    return response;
   }
 
   // Check session using cookie header
@@ -80,7 +112,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  return NextResponse.next();
+  // Add CORS headers to authenticated API responses
+  const response = NextResponse.next();
+  if (pathname.startsWith("/api/")) {
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+  }
+
+  return response;
 }
 
 export const config = {
