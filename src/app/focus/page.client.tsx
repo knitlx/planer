@@ -93,6 +93,9 @@ export default function FocusPage() {
   const handleMarkTodayCompleted = async (projectId: string) => {
     try {
       await updateProject(projectId, { todayCompleted: true });
+      
+      // Re-fetch projects to get updated state
+      await fetchProjects();
     } catch (error) {
       console.error("Failed to mark project as completed:", error);
     }
