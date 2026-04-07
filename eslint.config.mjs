@@ -8,6 +8,7 @@ const config = [
       "**/.next/**",
       "**/dist/**",
       "**/build/**",
+      "**/android/**",
       ".worktrees/**",
       "playwright-report/**",
       "test-results/**",
