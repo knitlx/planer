@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       });
 
       if (!user) {
-        return apiError(404, "USER_NOT_FOUND", "Пользователь не найден");
+        return apiError(404, "NOT_FOUND", "Пользователь не найден");
       }
     }
 
