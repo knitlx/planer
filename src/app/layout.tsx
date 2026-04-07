@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geologica, JetBrains_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -25,6 +25,15 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 const description = "Персональная система продуктивности: проекты, задачи, фокус и идеи.";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0A0908",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -63,7 +72,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geologica.variable} ${unbounded.variable} ${jetBrainsMono.variable}`}
     >
-      <body suppressHydrationWarning className="font-sans">
+      <body suppressHydrationWarning className="font-sans safe-area-padding">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <div className="quantum-bg" aria-hidden />
           <QuantumSidebar />
