@@ -22,7 +22,7 @@ function HabitCalendar({ habit, completedDates }: { habit: Habit, completedDates
   const startDate = new Date(monthStart);
   startDate.setDate(startDate.getDate() - monthStart.getDay()); // Start from Sunday
   
-  const calendarDays = [];
+  const calendarDays: Date[] = [];
   const currentDate = new Date(startDate);
   
   for (let i = 0; i < 42; i++) { // 6 weeks * 7 days
