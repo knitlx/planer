@@ -334,10 +334,10 @@ export default function AgentPageClient() {
 
   const cancelDeletion = () => {
     setPendingDeleteConfirmation(null);
-    const withCancel = [...messages, makeMessage("assistant", "Удаление отменено. Ничего не удалял.")];
+    const withCancel = [...messages, makeMessage("assistant", "Óäàëåíèå îòìåíåíî. Íè÷åãî íå óäàëÿë.")];
     setMessages(withCancel);
     void persistHistory(withCancel).catch((error: unknown) => {
-      toast.error(error instanceof Error ? error.message : "Ошибка сохранения истории");
+      toast.error(error instanceof Error ? error.message : "Îøèáêà ñîõðàíåíèÿ èñòîðèè");
     });
   };
 
@@ -348,9 +348,30 @@ export default function AgentPageClient() {
       return;
     }
 
+    // Check for Android runtime permissions
+    if ('permissions' in navigator) {
+      try {
+        const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        if (result.state === 'denied') {
+          toast.error("Отказано в доступе к микрофону в настройках приложения");
+          return;
+        }
+      } catch (error) {
+        // Permission API not available, continue with getUserMedia
+      }
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        } 
+      });
+      const recorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
       audioChunksRef.current = [];
 
       recorder.ondataavailable = (event) => {
@@ -359,7 +380,8 @@ export default function AgentPageClient() {
         }
       };
 
-      recorder.onerror = () => {
+      recorder.onerror = (event) => {
+        console.error('MediaRecorder error:', event);
         toast.error("Ошибка записи аудио");
       };
 
@@ -367,8 +389,22 @@ export default function AgentPageClient() {
       mediaRecorderRef.current = recorder;
       mediaStreamRef.current = stream;
       setIsRecording(true);
-    } catch {
-      toast.error("Не удалось получить доступ к микрофону");
+      toast.success("Запись началась");
+    } catch (error) {
+      console.error('Microphone access error:', error);
+      if (error instanceof DOMException) {
+        if (error.name === 'NotAllowedError') {
+          toast.error("Отказано в доступе к микрофону. Проверьте настройки приложения");
+        } else if (error.name === 'NotFoundError') {
+          toast.error("Микрофон не найден");
+        } else if (error.name === 'NotReadableError') {
+          toast.error("Микрофон не доступен для чтения");
+        } else {
+          toast.error(`Ошибка доступа к микрофону: ${error.name}`);
+        }
+      } else {
+        toast.error("Не удалось начать запись аудио");
+      }
     }
   };
 

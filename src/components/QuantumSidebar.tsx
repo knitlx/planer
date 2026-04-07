@@ -25,12 +25,6 @@ import { Button } from "@/components/ui/button";
 export function QuantumSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-
-  // Don't show sidebar on login page
-  if (pathname === "/login") {
-    return null;
-  }
-
   const { projects, fetchProjects, isLoading, error } = useProjectStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickCollectOpen, setQuickCollectOpen] = useState(false);
@@ -46,6 +40,11 @@ export function QuantumSidebar() {
     window.addEventListener("quick-collect:open", handler);
     return () => window.removeEventListener("quick-collect:open", handler);
   }, []);
+
+  // Don't show sidebar on login page
+  if (pathname === "/login") {
+    return null;
+  }
 
   const handleNewProject = () => {
     setMobileMenuOpen(false);

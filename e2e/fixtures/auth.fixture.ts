@@ -2,7 +2,7 @@ import { test as base, expect } from "@playwright/test";
 
 export const test = base.extend({
   // Authenticated API request context
-  request: async ({ request }, use) => {
+  request: async ({ request }, provide) => {
     // Login via API to get session cookie
     const loginResponse = await request.post("/api/auth/login", {
       data: { password: "admin" }
@@ -11,7 +11,7 @@ export const test = base.extend({
     expect(loginResponse.ok()).toBeTruthy();
     
     // Use authenticated request
-    await use(request);
+    await provide(request);
   }
 });
 
