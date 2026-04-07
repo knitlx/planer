@@ -30,7 +30,14 @@ export async function getSession(): Promise<IronSession<SessionData>> {
 export async function getSessionFromRequest(
   req: NextRequest
 ): Promise<IronSession<SessionData>> {
-  return getIronSession<SessionData>(req, sessionOptions);
+  const cookieStore = {
+    get: (name: string) => {
+      const value = req.cookies.get(name)?.value;
+      return value ? { name, value } : undefined;
+    },
+    set: () => {}, // Read-only for session check
+  };
+  return getIronSession<SessionData>(cookieStore, sessionOptions);
 }
 
 export async function verifyPassword(
