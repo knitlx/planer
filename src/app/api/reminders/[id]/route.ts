@@ -38,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!reminder) {
-      return apiError(404, "REMINDER_NOT_FOUND", "Напоминание не найдено");
+      return apiError(404, "NOT_FOUND", "Напоминание не найдено");
     }
 
     return NextResponse.json(reminder);
@@ -88,7 +88,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return validationError(error.message);
     }
     if (error instanceof Error && error.message.includes("Record to update not found")) {
-      return apiError(404, "REMINDER_NOT_FOUND", "Напоминание не найдено");
+      return apiError(404, "NOT_FOUND", "Напоминание не найдено");
     }
     return apiError(500, "INTERNAL_ERROR", "Не удалось обновить напоминание");
   }
@@ -104,7 +104,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes("Record to delete does not exist")) {
-      return apiError(404, "REMINDER_NOT_FOUND", "Напоминание не найдено");
+      return apiError(404, "NOT_FOUND", "Напоминание не найдено");
     }
     return apiError(500, "INTERNAL_ERROR", "Не удалось удалить напоминание");
   }
