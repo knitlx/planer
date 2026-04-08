@@ -64,7 +64,7 @@ export class NotificationService {
     const message = event.message(payload);
 
     await TelegramService.sendMessage(
-      parseInt(process.env.TELEGRAM_CHAT_ID || "0"),
+      parseInt(process.env.TELEGRAM_DEFAULT_CHAT_ID || process.env.TELEGRAM_CHAT_ID || "0"),
       message,
     );
 

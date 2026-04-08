@@ -120,7 +120,7 @@ export function RoutinesClient() {
         setHabits(data);
       }
     } catch (error) {
-      console.error("Failed to fetch habits:", error);
+      toast.error(error instanceof Error ? error.message : "Не удалось загрузить привычки");
     } finally {
       setLoading(false);
     }

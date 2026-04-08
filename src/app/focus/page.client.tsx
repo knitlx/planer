@@ -5,6 +5,7 @@ import { useProjectStore } from "@/store/useProjectStore";
 import { useRouter } from "next/navigation";
 import { Flame, ArrowRight, Target, Lock, Unlock } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import type { ProjectType } from "@/types/project";
 
 function isThailandBefore8AM(): boolean {
@@ -56,13 +57,13 @@ export default function FocusPage() {
       });
       
       if (projectsToReset.length > 0) {
-        console.log('Resetting mandatory projects for new day:', projectsToReset.map(p => p.name));
+        toast.info(`Сброс ежедневных проектов: ${projectsToReset.length}`);
         // Reset todayCompleted for projects completed before today
         for (const project of projectsToReset) {
           try {
             await updateProject(project.id, { todayCompleted: false });
           } catch (error) {
-            console.error(`Failed to reset project ${project.name}:`, error);
+            toast.error(`Не удалось сбросить "${project.name}"`);
           }
         }
       }
@@ -97,7 +98,7 @@ export default function FocusPage() {
       // Re-fetch projects to get updated state
       await fetchProjects();
     } catch (error) {
-      console.error("Failed to mark project as completed:", error);
+      toast.error("Не удалось отметить проект как выполненный");
     }
   };
 

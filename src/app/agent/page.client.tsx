@@ -396,7 +396,6 @@ export default function AgentPageClient() {
       };
 
       recorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
         toast.error("Ошибка записи аудио");
       };
 
@@ -406,7 +405,6 @@ export default function AgentPageClient() {
       setIsRecording(true);
       toast.success("Запись началась");
     } catch (error) {
-      console.error('Microphone access error:', error);
       if (error instanceof DOMException) {
         if (error.name === 'NotAllowedError') {
           toast.error("Отказано в доступе к микрофону. Проверьте настройки приложения");

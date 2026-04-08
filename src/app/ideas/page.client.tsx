@@ -88,7 +88,7 @@ export default function IdeasPage() {
       const data = await res.json();
       setIdeas(data);
     } catch (error) {
-      console.error("Error fetching ideas:", error);
+      toast.error(getApiErrorMessage(error));
     } finally {
       setIsLoading(false);
     }

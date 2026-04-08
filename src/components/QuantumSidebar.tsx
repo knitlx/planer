@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -11,40 +11,49 @@ import {
   Lightbulb,
   Bot,
   Plus,
-  Loader2,
   Menu,
   Timer,
   Repeat,
   Bell,
   LogOut,
+  Activity,
+  Target,
+  ChevronDown,
 } from "lucide-react";
-import { useProjectStore } from "@/store/useProjectStore";
 import { AppModal } from "@/components/AppModal";
 import { Button } from "@/components/ui/button";
+
+const MAIN_NAV_ITEMS = [
+  { href: "/", label: "Главная", icon: Home },
+  { href: "/agent", label: "AI Агент", icon: Bot },
+  { href: "/projects", label: "Проекты", icon: Folder },
+  { href: "/tasks", label: "Задачи", icon: CheckSquare },
+  { href: "/routines", label: "Привычки", icon: Repeat },
+];
+
+const EXTRA_NAV_ITEMS = [
+  { href: "/radar", label: "Радар", icon: Activity },
+  { href: "/review", label: "Обзор", icon: Target },
+  { href: "/reminders", label: "Напоминания", icon: Bell },
+  { href: "/ideas", label: "Идеи", icon: Lightbulb },
+  { href: "/archive", label: "Архив", icon: Archive },
+];
+
+function isActive(path: string, pathname: string) {
+  if (path === "/") return pathname === "/";
+  return pathname.startsWith(path);
+}
 
 export function QuantumSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { projects, fetchProjects, isLoading, error } = useProjectStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickCollectOpen, setQuickCollectOpen] = useState(false);
   const [quickCollectContent, setQuickCollectContent] = useState("");
   const [isSubmittingQuickCollect, setIsSubmittingQuickCollect] = useState(false);
+  const [extraOpen, setExtraOpen] = useState(false);
 
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-
-  useEffect(() => {
-    const handler = () => setQuickCollectOpen(true);
-    window.addEventListener("quick-collect:open", handler);
-    return () => window.removeEventListener("quick-collect:open", handler);
-  }, []);
-
-  // Don't show sidebar on login page
-  if (pathname === "/login") {
-    return null;
-  }
+  if (pathname === "/login") return null;
 
   const handleNewProject = () => {
     setMobileMenuOpen(false);
@@ -94,40 +103,26 @@ export function QuantumSidebar() {
     }
   };
 
-  const navItems = [
-    { href: "/", label: "Главная", icon: Home },
-    { href: "/agent", label: "AI Агент", icon: Bot },
-    { href: "/projects", label: "Проекты", icon: Folder },
-    { href: "/reminders", label: "Напоминания", icon: Bell },
-    { href: "/ideas", label: "Идеи", icon: Lightbulb },
-    { href: "/tasks", label: "Задачи", icon: CheckSquare },
-    { href: "/routines", label: "Привычки", icon: Repeat },
-    { href: "/archive", label: "Архив", icon: Archive },
-  ];
+  const mobileLinkClass = (active: boolean) =>
+    `w-full flex items-center gap-3 text-left p-3 px-4 text-sm rounded-xl transition-all ${
+      active
+        ? "text-qf-text-primary bg-white/6 border-l-2 border-qf-text-accent rounded-r-xl rounded-l-none -ml-4 pl-[30px]"
+        : "text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5"
+    }`;
 
-  const activeProjects = projects.filter((project) => project.status !== "DONE");
-
-  const isActive = (path: string) => {
-    if (path === "/") return pathname === "/";
-    return pathname.startsWith(path);
-  };
-
-  const getProjectDotColor = (status?: string) => {
-    if (status === "ACTIVE") return "bg-[#ff5f33]";
-    if (status === "SNOOZED") return "bg-[#a2d149]";
-    if (status === "FINAL_STRETCH") return "bg-[#ffc300]";
-    if (status === "DONE") return "bg-qf-text-muted";
-    return "bg-qf-text-muted";
-  };
+  const desktopLinkClass = (active: boolean) =>
+    `flex items-center p-3 px-4 text-sm transition-all ${
+      active
+        ? "text-qf-text-primary bg-white/6 font-semibold border-l-2 border-qf-text-accent rounded-r-xl rounded-l-none -ml-4 pl-[30px]"
+        : "text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5 rounded-xl"
+    }`;
 
   return (
     <>
+      {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-20 px-4 py-3 border-b border-qf-border-secondary bg-[#0A0908]/95 backdrop-blur-xl">
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => router.push("/")}
-            className="flex items-center gap-2"
-          >
+          <button onClick={() => router.push("/")} className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#ffc300] border border-[#ffc300]/70">
               <span className="text-2xl font-black text-[#0A0908] font-[var(--font-unbounded)] leading-none">P</span>
             </div>
@@ -145,86 +140,75 @@ export function QuantumSidebar() {
         </div>
       </header>
 
-      <AppModal
-        open={mobileMenuOpen}
-        title="Меню"
-        onClose={() => setMobileMenuOpen(false)}
-        footer={null}
-      >
+      {/* Mobile menu modal */}
+      <AppModal open={mobileMenuOpen} title="Меню" onClose={() => setMobileMenuOpen(false)} footer={null}>
         <div className="space-y-4">
           <div className="space-y-1">
-            {navItems.map((item) => {
+            {MAIN_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const active = isActive(item.href);
+              const active = isActive(item.href, pathname);
               return (
-                <button
-                  key={item.href}
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    router.push(item.href);
-                  }}
-                  className={`w-full flex items-center gap-3 text-left p-3 px-4 text-sm rounded-xl transition-all ${
-                    active
-                      ? "text-qf-text-primary bg-white/6 border-l-2 border-qf-text-accent rounded-r-xl rounded-l-none -ml-4 pl-[30px]"
-                      : "text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5"
-                  }`}
-                >
+                <button key={item.href} onClick={() => { setMobileMenuOpen(false); router.push(item.href); }} className={mobileLinkClass(active)}>
                   <Icon width={18} height={18} strokeWidth={2} />
                   {item.label}
                 </button>
               );
             })}
           </div>
+
+          <div>
+            <button onClick={() => setExtraOpen(!extraOpen)} className="w-full flex items-center justify-between p-3 px-4 text-sm text-qf-text-muted hover:text-qf-text-primary transition-colors">
+              <span className="flex items-center">
+                <ChevronDown className={`w-3.5 h-3.5 mr-2 transition-transform ${extraOpen ? "rotate-180" : ""}`} />
+                Ещё
+              </span>
+            </button>
+            {extraOpen && (
+              <div className="space-y-1 pt-1">
+                {EXTRA_NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href, pathname);
+                  return (
+                    <button key={item.href} onClick={() => { setMobileMenuOpen(false); router.push(item.href); }} className={mobileLinkClass(active)}>
+                      <Icon width={18} height={18} strokeWidth={2} />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 gap-2 pt-2 border-t border-qf-border-secondary">
-            <button
-              className="w-full px-4 py-2.5 rounded-xl border border-qf-border-primary text-qf-text-secondary hover:text-qf-text-primary hover:bg-white/5 transition-colors text-sm"
-              onClick={handleNewProject}
-            >
+            <button className="w-full px-4 py-2.5 rounded-xl border border-qf-border-primary text-qf-text-secondary hover:text-qf-text-primary hover:bg-white/5 transition-colors text-sm" onClick={handleNewProject}>
               <Plus className="w-4 h-4 mr-2 inline-block" />
               Новый проект
             </button>
-            <button
-              className="w-full px-4 py-2.5 rounded-xl border border-qf-border-primary text-qf-text-secondary hover:text-qf-text-primary hover:bg-white/5 transition-colors text-sm"
-              onClick={handleQuickCollect}
-            >
+            <button className="w-full px-4 py-2.5 rounded-xl border border-qf-border-primary text-qf-text-secondary hover:text-qf-text-primary hover:bg-white/5 transition-colors text-sm" onClick={handleQuickCollect}>
               Быстрый сбор
             </button>
-            <button
-              className="w-full px-4 py-3 rounded-xl bg-qf-gradient-primary text-[#0A0908] font-semibold text-sm hover:brightness-105 transition-all"
-              onClick={handleQuickFocus}
-            >
+            <button className="w-full px-4 py-3 rounded-xl bg-qf-gradient-primary text-[#0A0908] font-semibold text-sm hover:brightness-105 transition-all" onClick={handleQuickFocus}>
               Старт фокуса
             </button>
           </div>
         </div>
       </AppModal>
 
+      {/* Quick collect modal */}
       <AppModal
         open={quickCollectOpen}
         title="Быстрый сбор"
         onClose={() => setQuickCollectOpen(false)}
         footer={
           <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => setQuickCollectOpen(false)}
-              variant="secondary"
-              className="w-full"
-            >
-              Отмена
-            </Button>
-            <Button
-              onClick={() => void submitQuickCollect()}
-              disabled={isSubmittingQuickCollect || !quickCollectContent.trim()}
-              className="w-full"
-            >
+            <Button onClick={() => setQuickCollectOpen(false)} variant="secondary" className="w-full">Отмена</Button>
+            <Button onClick={() => void submitQuickCollect()} disabled={isSubmittingQuickCollect || !quickCollectContent.trim()} className="w-full">
               {isSubmittingQuickCollect ? "Сохранение..." : "Сохранить"}
             </Button>
           </div>
         }
       >
-        <label htmlFor="sidebar-quick-collect-textarea" className="sr-only">
-          Текст быстрой заметки
-        </label>
+        <label htmlFor="sidebar-quick-collect-textarea" className="sr-only">Текст быстрой заметки</label>
         <textarea
           id="sidebar-quick-collect-textarea"
           value={quickCollectContent}
@@ -235,6 +219,7 @@ export function QuantumSidebar() {
         />
       </AppModal>
 
+      {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-64 h-screen flex-col fixed left-0 top-0 z-10 bg-[#0A0908] border-r border-qf-border-secondary pt-8 pb-4 px-4 overflow-hidden">
         <div className="px-3 mb-12">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
@@ -248,19 +233,11 @@ export function QuantumSidebar() {
 
         <nav className="flex-1 flex flex-col overflow-y-auto min-h-0">
           <div className="space-y-1">
-            {navItems.map((item) => {
+            {MAIN_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
-              const active = isActive(item.href);
+              const active = isActive(item.href, pathname);
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center p-3 px-4 text-sm transition-all ${
-                    active
-                      ? "text-qf-text-primary bg-white/6 font-semibold border-l-2 border-qf-text-accent rounded-r-xl rounded-l-none -ml-4 pl-[30px]"
-                      : "text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5 rounded-xl"
-                  }`}
-                >
+                <Link key={item.href} href={item.href} className={desktopLinkClass(active)}>
                   <Icon className="w-4 h-4 mr-3" />
                   <span>{item.label}</span>
                 </Link>
@@ -268,52 +245,35 @@ export function QuantumSidebar() {
             })}
           </div>
 
-          <div className="mt-12">
-            <div className="flex items-center justify-between mb-4 px-3">
-              <p className="text-xs tracking-wide text-qf-text-muted font-medium font-[var(--font-unbounded)]">Проекты</p>
-              <button onClick={handleNewProject} className="text-xs font-medium text-qf-text-accent hover:opacity-80">+ Новый</button>
-            </div>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-4 h-4 animate-spin text-qf-text-muted" />
-              </div>
-            ) : error ? (
-              <div className="px-3 py-2 text-sm text-red-500">Ошибка загрузки</div>
-            ) : (
-              <div className="space-y-1">
-                {activeProjects.slice(0, 5).map((project) => (
-                  <Link key={project.id} href={`/focus/${project.id}`} className="flex items-start justify-between gap-2 px-4 py-2.5 text-sm text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5 rounded-lg font-medium transition-all">
-                    <div className="flex items-start min-w-0 flex-1">
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full mr-3 mt-1.5 flex-shrink-0 ${getProjectDotColor(project.status)}`}
-                      />
-                      <span className="flex-1 whitespace-normal break-words leading-snug">{project.name}</span>
-                    </div>
-                    <span
-                      className="text-[10px] text-qf-text-muted shrink-0 mt-0.5"
-                    >
-                      {project.progress}%
-                    </span>
-                  </Link>
-                ))}
-                {activeProjects.length === 0 && <div className="px-3 py-2 text-sm text-qf-text-muted">Нет проектов</div>}
+          <div className="mt-2">
+            <button onClick={() => setExtraOpen(!extraOpen)} className="w-full flex items-center justify-between p-3 px-4 text-sm text-qf-text-muted hover:text-qf-text-primary transition-colors">
+              <span className="flex items-center">
+                <ChevronDown className={`w-3.5 h-3.5 mr-2 transition-transform ${extraOpen ? "rotate-180" : ""}`} />
+                Ещё
+              </span>
+            </button>
+            {extraOpen && (
+              <div className="space-y-1 pt-1 pb-2">
+                {EXTRA_NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href, pathname);
+                  return (
+                    <Link key={item.href} href={item.href} className={desktopLinkClass(active)}>
+                      <Icon className="w-4 h-4 mr-3" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>
 
-          <div className="mt-auto pt-8 flex flex-col gap-2">
-            <button
-              onClick={handleQuickFocus}
-              className="focus-button w-auto px-3.5 py-2 flex items-center justify-center gap-2 rounded-xl text-sm tracking-tight"
-            >
+          <div className="mt-auto pt-6 flex flex-col gap-2">
+            <button onClick={handleQuickFocus} className="focus-button w-auto px-3.5 py-3 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold tracking-tight">
               <Timer className="w-4 h-4 text-[#0A0908]" strokeWidth={2.8} />
               Старт фокуса
             </button>
-            <button
-              onClick={handleLogout}
-              className="w-auto px-3.5 py-2 flex items-center justify-center gap-2 rounded-xl text-sm tracking-tight text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5 transition-colors"
-              aria-label="Выйти"
-            >
+            <button onClick={handleLogout} className="w-auto px-3.5 py-2 flex items-center justify-center gap-2 rounded-xl text-xs tracking-tight text-qf-text-muted hover:text-qf-text-primary hover:bg-white/5 transition-colors" aria-label="Выйти">
               <LogOut className="w-4 h-4" strokeWidth={2} />
               Выйти
             </button>
