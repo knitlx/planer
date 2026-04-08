@@ -205,6 +205,23 @@ export function TheFocusRoom() {
       await persistElapsedTimeToTask().catch((error) => {
         console.error("Failed to persist timer before stop:", error);
       });
+
+      // Log focus session
+      const durationSec = Math.round(displayElapsedMs / 1000);
+      if (durationSec > 0 && currentProjectId) {
+        fetch("/api/focus-sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectId: currentProjectId,
+            taskId: currentTaskId,
+            durationSec,
+            startedAt: sessionStartTime ? new Date(sessionStartTime).toISOString() : undefined,
+            note: note || undefined,
+          }),
+        }).catch(() => {});
+      }
+
       const response = await fetch(`/api/projects/${currentProjectId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

@@ -28,6 +28,7 @@ model Project {
   notificationLogs NotificationLog[]
   reminderTriggerLogs ReminderTriggerLog[]
   habits          Habit[]
+  focusSessions   FocusSession[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -148,6 +149,21 @@ model HabitLog {
   completed Boolean  @default(false)
 
   @@unique([habitId, date])
+}
+
+model FocusSession {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId     String?
+  startedAt  DateTime @default(now())
+  endedAt    DateTime
+  durationSec Int
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([projectId])
+  @@index([startedAt])
 }
 
 model AgentChatMessage {
