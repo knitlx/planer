@@ -56,7 +56,9 @@ function renderInlineMarkdown(text: string): ReactNode[] {
 }
 
 function MarkdownMessage({ content }: { content: string }) {
-  const lines = content.split("\n");
+  // Скрываем технические HTML-комментарии
+  const cleanedContent = content.replace(/<!--DELETE_REQUEST:[^>]*-->/g, "").trim();
+  const lines = cleanedContent.split("\n");
   const blocks: ReactNode[] = [];
   let i = 0;
   let inCodeFence = false;
@@ -250,6 +252,19 @@ export default function AgentPageClient() {
   };
 
   const extractDeleteConfirmation = (text: string): PendingDeleteConfirmation | null => {
+    // Новый формат: <!--DELETE_REQUEST:delete_task=abc123-->
+    const htmlMatch = text.match(/<!--DELETE_REQUEST:(delete_task|delete_project)=([^\s-]+)-->/i);
+    if (htmlMatch) {
+      const toolName = htmlMatch[1].toLowerCase() as "delete_task" | "delete_project";
+      const id = htmlMatch[2];
+      return {
+        toolName,
+        id,
+        command: `CONFIRM_DELETE ${toolName} ${id}`,
+      };
+    }
+
+    // Старый формат (fallback): CONFIRM_DELETE delete_task abc123
     const match = text.match(/CONFIRM_DELETE\s+(delete_task|delete_project)\s+([^\s]+)/i);
     if (!match) return null;
     const toolName = match[1].toLowerCase() as "delete_task" | "delete_project";
