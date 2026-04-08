@@ -9,7 +9,6 @@ import {
   validationError,
 } from "@/lib/api-validation";
 
-const WIP_LIMIT = 3;
 const PROJECT_STATUSES = ["INCUBATOR", "ACTIVE", "SNOOZED", "FINAL_STRETCH", "DONE"] as const;
 
 export async function PUT(
@@ -37,25 +36,6 @@ export async function PUT(
   const project = await prisma.project.findUnique({ where: { id } });
   if (!project) {
     return apiError(404, "NOT_FOUND", "Проект не найден");
-  }
-
-  if (status === "ACTIVE" && project.status !== "ACTIVE") {
-    const activeCount = await prisma.project.count({
-      where: { status: "ACTIVE", id: { not: id } },
-    });
-    if (activeCount >= WIP_LIMIT) {
-      const activeProjects = await prisma.project.findMany({
-        where: { status: "ACTIVE", id: { not: id } },
-        select: { id: true, name: true },
-      });
-      return NextResponse.json(
-        {
-          error: { code: "WIP_LIMIT_EXCEEDED", message: `Нельзя активировать больше ${WIP_LIMIT} проектов` },
-          activeProjects,
-        },
-        { status: 409 },
-      );
-    }
   }
 
   if (project.status === "ACTIVE" && status !== "ACTIVE" && !lastSessionNote) {
