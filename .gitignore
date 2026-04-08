@@ -16,7 +16,7 @@ old-design.html
 design-prototypes/
 screenshot*.png
 docs/
-!docs/plans/
+AGENTS.md
 playwright-report/
 test-results/
 cookies.txt
