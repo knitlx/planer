@@ -93,7 +93,7 @@ export default function ProjectsPage() {
         </div>
         <button
           onClick={() => router.push("/focus/new")}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-qf-gradient-primary text-[#0A0908] text-sm font-semibold hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#ffc300] text-[#0A0908] text-sm font-semibold hover:opacity-90 transition-opacity"
         >
           <Plus className="w-4 h-4" />
           Создать проект

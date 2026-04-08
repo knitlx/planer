@@ -344,9 +344,9 @@ export default function TasksPage() {
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium text-qf-text-primary">{task.title}</p>
+                    <p className="font-medium text-qf-text-primary break-words overflow-hidden">{task.title}</p>
                     {task.contextSummary ? (
-                      <p className="mt-1 text-xs text-qf-text-secondary whitespace-pre-wrap">{task.contextSummary}</p>
+                      <p className="mt-1 text-xs text-qf-text-secondary whitespace-pre-wrap break-all">{task.contextSummary}</p>
                     ) : null}
                     <Link
                       href={`/focus/${task.projectId}`}

@@ -403,7 +403,6 @@ export default function AgentPageClient() {
       mediaRecorderRef.current = recorder;
       mediaStreamRef.current = stream;
       setIsRecording(true);
-      toast.success("Запись началась");
     } catch (error) {
       if (error instanceof DOMException) {
         if (error.name === 'NotAllowedError') {
