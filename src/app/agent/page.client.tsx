@@ -486,17 +486,17 @@ export default function AgentPageClient() {
   };
 
   return (
-    <section className="p-6 md:p-12 space-y-6 min-h-screen">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+    <div className="h-screen flex flex-col p-2 md:p-4 overflow-hidden">
+      <header className="flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-qf-bg-secondary border border-qf-border-accent flex items-center justify-center">
-            <Bot className="w-6 h-6 text-[#FFC300]" strokeWidth={2.3} />
+          <div className="w-10 h-10 rounded-xl bg-qf-bg-secondary border border-qf-border-accent flex items-center justify-center">
+            <Bot className="w-5 h-5 text-[#FFC300]" strokeWidth={2.3} />
           </div>
           <div>
-            <h1 className={`text-3xl md:text-4xl font-bold ${quantumGradientClasses.text}`}>
+            <h1 className="text-xl md:text-2xl font-bold text-qf-text-primary">
               AI Агент
             </h1>
-            <p className="text-qf-text-secondary text-sm md:text-base">
+            <p className="text-qf-text-secondary text-xs md:text-sm">
               Управление проектами, задачами и идеями через диалог
             </p>
           </div>
@@ -575,7 +575,7 @@ export default function AgentPageClient() {
         </div>
       </header>
 
-      <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-secondary/40 px-3 py-2 text-xs text-qf-text-secondary">
+      <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-secondary/40 px-3 py-1.5 text-xs text-qf-text-secondary shrink-0">
         {mode === "ASSISTANT"
           ? "Режим ASSISTANT: обычный исполнитель ваших команд."
           : mode === "PLAN"
@@ -588,7 +588,7 @@ export default function AgentPageClient() {
 
       <div
         ref={listRef}
-        className="h-[58vh] overflow-y-auto rounded-2xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-4 md:p-6 space-y-4"
+        className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-3 md:p-4 space-y-3 mt-2"
       >
         {messages.map((message) => (
           <div
@@ -614,7 +614,7 @@ export default function AgentPageClient() {
         )}
       </div>
 
-      <div className="rounded-2xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-3 md:p-4">
+      <div className="rounded-2xl border border-qf-border-secondary bg-qf-bg-glass backdrop-blur-lg p-2 md:p-3 shrink-0">
         {pendingDeleteConfirmation && (
           <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3">
             <p className="text-sm text-red-200">
@@ -677,6 +677,6 @@ export default function AgentPageClient() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

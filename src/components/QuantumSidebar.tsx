@@ -187,7 +187,7 @@ export function QuantumSidebar() {
             <button className="w-full px-4 py-2.5 rounded-xl border border-qf-border-primary text-qf-text-secondary hover:text-qf-text-primary hover:bg-white/5 transition-colors text-sm" onClick={handleQuickCollect}>
               Быстрый сбор
             </button>
-            <button className="w-full px-4 py-3 rounded-xl bg-qf-gradient-primary text-[#0A0908] font-semibold text-sm hover:brightness-105 transition-all" onClick={handleQuickFocus}>
+            <button className="w-full px-4 py-3 rounded-xl bg-[#ffc300] text-[#0A0908] font-semibold text-sm hover:brightness-105 transition-all" onClick={handleQuickFocus}>
               Старт фокуса
             </button>
           </div>
@@ -269,7 +269,7 @@ export function QuantumSidebar() {
           </div>
 
           <div className="mt-auto pt-6 flex flex-col gap-2">
-            <button onClick={handleQuickFocus} className="focus-button w-auto px-3.5 py-3 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold tracking-tight">
+            <button onClick={handleQuickFocus} className="w-auto px-3.5 py-3 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold tracking-tight bg-[#ffc300] text-[#0A0908] hover:brightness-105 transition-all">
               <Timer className="w-4 h-4 text-[#0A0908]" strokeWidth={2.8} />
               Старт фокуса
             </button>
