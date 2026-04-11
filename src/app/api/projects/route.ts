@@ -26,7 +26,9 @@ export async function GET() {
   try {
     const projects = await prisma.project.findMany({
       include: { tasks: { orderBy: { order: "asc" } } },
-      orderBy: { updatedAt: "desc" },
+      orderBy: [
+        { updatedAt: "desc" },
+      ],
     });
 
     // Упрощенная версия обогащения проектов
@@ -47,6 +49,22 @@ export async function GET() {
         focusScore: Math.round(focusScore),
         daysStale: daysSinceActive,
       };
+    });
+
+    // Sort by status priority: ACTIVE > FINAL_STRETCH > SNOOZED > INCUBATOR > DONE, then by updatedAt
+    const statusPriority: Record<string, number> = {
+      ACTIVE: 0,
+      FINAL_STRETCH: 1,
+      SNOOZED: 2,
+      INCUBATOR: 3,
+      DONE: 4,
+    };
+
+    enrichedProjects.sort((a, b) => {
+      const pa = statusPriority[a.status] ?? 5;
+      const pb = statusPriority[b.status] ?? 5;
+      if (pa !== pb) return pa - pb;
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
 
     return NextResponse.json(enrichedProjects);
