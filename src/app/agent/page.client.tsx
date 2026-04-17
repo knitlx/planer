@@ -493,9 +493,9 @@ export default function AgentPageClient() {
   };
 
   return (
-    <div className="h-screen flex flex-col p-2 md:p-4 overflow-hidden">
+    <div className="h-[100dvh] flex flex-col p-2 md:p-4 overflow-hidden">
       <header className="flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-qf-bg-secondary border border-qf-border-accent flex items-center justify-center">
             <Bot className="w-5 h-5 text-[#FFC300]" strokeWidth={2.3} />
           </div>
@@ -582,7 +582,7 @@ export default function AgentPageClient() {
         </div>
       </header>
 
-      <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-secondary/40 px-3 py-1.5 text-xs text-qf-text-secondary shrink-0">
+      <div className="hidden md:block rounded-xl border border-qf-border-secondary bg-qf-bg-secondary/40 px-3 py-1.5 text-xs text-qf-text-secondary shrink-0">
         {mode === "ASSISTANT"
           ? "Режим ASSISTANT: обычный исполнитель ваших команд."
           : mode === "PLAN"

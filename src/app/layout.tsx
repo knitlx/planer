@@ -72,11 +72,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geologica.variable} ${unbounded.variable} ${jetBrainsMono.variable}`}
     >
-      <body suppressHydrationWarning className="font-sans safe-area-padding">
+      <body suppressHydrationWarning className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <div className="quantum-bg" aria-hidden />
           <QuantumSidebar />
-          <main className="lg:pl-64 min-h-screen pt-16 lg:pt-0">{children}</main>
+          <main className="lg:pl-64 min-h-[100dvh] pt-[calc(64px+env(safe-area-inset-top))] lg:pt-0">{children}</main>
           <Toaster />
         </ThemeProvider>
       </body>

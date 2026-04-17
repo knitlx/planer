@@ -120,7 +120,7 @@ export function QuantumSidebar() {
   return (
     <>
       {/* Mobile header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-20 px-4 py-3 border-b border-qf-border-secondary bg-[#0A0908]/95 backdrop-blur-xl">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-20 px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] border-b border-qf-border-secondary bg-[#0A0908]/95 backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <button onClick={() => router.push("/")} className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[#ffc300] border border-[#ffc300]/70">
