@@ -493,7 +493,7 @@ export default function AgentPageClient() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col p-2 md:p-4 overflow-hidden">
+    <div className="flex flex-col p-2 md:p-4 overflow-hidden h-[calc(100dvh-64px-env(safe-area-inset-top))] lg:h-[100dvh]">
       <header className="flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
         <div className="hidden md:flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-qf-bg-secondary border border-qf-border-accent flex items-center justify-center">
