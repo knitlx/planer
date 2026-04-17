@@ -486,20 +486,23 @@ export default function AgentPageClient() {
   };
 
   return (
-    <div className="h-[100dvh] flex flex-col p-2 md:p-4 pt-[calc(56px+env(safe-area-inset-top))] md:pt-4 overflow-hidden">
+    <div className="h-screen flex flex-col p-2 md:p-4 overflow-hidden">
       <header className="flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-qf-bg-secondary border border-qf-border-accent flex items-center justify-center">
-            <Bot className="w-4 h-4 text-[#FFC300]" strokeWidth={2.3} />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-qf-bg-secondary border border-qf-border-accent flex items-center justify-center">
+            <Bot className="w-5 h-5 text-[#FFC300]" strokeWidth={2.3} />
           </div>
           <div>
-            <h1 className="text-lg md:text-2xl font-bold text-qf-text-primary">
+            <h1 className="text-xl md:text-2xl font-bold text-qf-text-primary">
               AI Агент
             </h1>
+            <p className="text-qf-text-secondary text-xs md:text-sm">
+              Управление проектами, задачами и идеями через диалог
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1 md:gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex rounded-lg border border-qf-border-primary bg-qf-bg-secondary p-1">
             <button
               type="button"
@@ -572,10 +575,15 @@ export default function AgentPageClient() {
         </div>
       </header>
 
-      <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-secondary/40 px-2 py-1 text-xs text-qf-text-secondary shrink-0">
-        {mode === "ASSISTANT" ? "Assistant" : mode === "PLAN" ? "Plan" : "Build"}
-        {" · "}
-        {responseStyle === "BRIEF" ? "Кратко" : "Подробно"}
+      <div className="rounded-xl border border-qf-border-secondary bg-qf-bg-secondary/40 px-3 py-1.5 text-xs text-qf-text-secondary shrink-0">
+        {mode === "ASSISTANT"
+          ? "Режим ASSISTANT: обычный исполнитель ваших команд."
+          : mode === "PLAN"
+            ? "Режим PLAN: советник без изменений в данных."
+            : "Режим BUILD: советник с возможностью применять изменения."}{" "}
+        {responseStyle === "BRIEF"
+          ? "Стиль: кратко."
+          : "Стиль: подробно (больше рассуждений)."}
       </div>
 
       <div
@@ -637,9 +645,15 @@ export default function AgentPageClient() {
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Сообщение..."
+            placeholder="Например: создай проект 'Запуск MVP' и добавь в него 3 задачи"
             className="flex-1 min-h-[44px] max-h-[120px] rounded-md border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-y"
             rows={1}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void sendMessage();
+              }
+            }}
           />
 
           <div className="flex gap-2">
