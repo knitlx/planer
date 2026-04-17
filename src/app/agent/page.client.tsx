@@ -180,6 +180,14 @@ export default function AgentPageClient() {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const autoResizeTextarea = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  };
 
   useEffect(() => {
     const savedMode = localStorage.getItem("agent-mode");
@@ -462,7 +470,6 @@ export default function AgentPageClient() {
       }
 
       setInput((prev) => [prev.trim(), text].filter(Boolean).join(" "));
-      toast.success("Речь распознана");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Ошибка транскрибации");
     } finally {
@@ -643,10 +650,14 @@ export default function AgentPageClient() {
 
         <div className="flex flex-col md:flex-row gap-2 md:items-center">
           <textarea
+            ref={textareaRef}
             value={input}
-            onChange={(event) => setInput(event.target.value)}
+            onChange={(event) => {
+              setInput(event.target.value);
+              autoResizeTextarea();
+            }}
             placeholder="Например: создай проект 'Запуск MVP' и добавь в него 3 задачи"
-            className="flex-1 min-h-[44px] max-h-[120px] rounded-md border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-y"
+            className="flex-1 min-h-[44px] rounded-md border border-qf-border-primary bg-qf-bg-secondary px-3 py-2 text-sm text-qf-text-primary placeholder:text-qf-text-muted focus:outline-none focus:border-qf-border-accent resize-none overflow-hidden"
             rows={1}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
